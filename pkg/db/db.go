@@ -172,209 +172,202 @@ func (d *DB) RmAll(guildID string) error {
 	return nil
 }
 
-// move to Kronos
-/*
-func (d *DB) ShowAll(guildID string) []string {
+func (d *DB) GetAll(guildID string) ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	contxt := context.Background()
 	allStocks := make([]*Stock, 0)
 	allShorts := make([]*Short, 0)
 	allOptions := make([]*Option, 0)
 	allCrypto := make([]*Crypto, 0)
 
-	var (
-		stockStr  string
-		shortStr  string
-		optiStr   string
-		cryptoStr string
-	)
-
 	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", guildID).Scan(contxt, &allStocks)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
-		stockStr = "Unable to get stocks\n"
+		return nil, nil, nil, nil, err
 	}
 
 	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", guildID).Scan(contxt, &allShorts)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
-		shortStr = "Unable to get shorts\n"
+		return nil, nil, nil, nil, err
 	}
 
 	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", guildID).Scan(contxt, &allCrypto)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
-		cryptoStr = "Unable to get crypto\n"
+		return nil, nil, nil, nil, err
 	}
 
 	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", guildID).Scan(contxt, &allOptions)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
-		optiStr = "Unable to get options\n"
+		return nil, nil, nil, nil, err
 	}
 
-	if len(allStocks) > 0 {
-		stockStr = "\n**__Stocks__**\n"
+	return allStocks, allShorts, allCrypto, allOptions, nil
+	/*
+		if len(allStocks) > 0 {
+			stockStr = "\n**__Stocks__**\n"
 
-		for _, v := range allStocks {
-			OGPrice := v.StockStarting
-			newPrice, err := stonks.GetStock(v.StockTicker)
+			for _, v := range allStocks {
+				OGPrice := v.StockStarting
+				newPrice, err := stonks.GetStock(v.StockTicker)
 
-			tradeType := ""
+				tradeType := ""
 
-			switch v.ChannelType {
-			case utils.DAY:
-				tradeType = "Day Trade"
-			case utils.SWING:
-				tradeType = "Long Trade"
-			case utils.WATCHLIST:
-				tradeType = "Watchlist"
-			}
-
-			if err != nil {
-				stockStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.2f* - %v", v.StockTicker, OGPrice, tradeType) + "\n"
-			} else {
-				stockStr += fmt.Sprintf("**%v** starting price: *$%.2f*, current price: *$%.2f* - %v", v.StockTicker, OGPrice, newPrice, tradeType)
-				if v.StockEPt != 0 {
-					stockStr += fmt.Sprintf(" Exit PT: $%.2f ", v.StockEPt)
+				switch v.ChannelType {
+				case utils.DAY:
+					tradeType = "Day Trade"
+				case utils.SWING:
+					tradeType = "Long Trade"
+				case utils.WATCHLIST:
+					tradeType = "Watchlist"
 				}
-				if v.StockSPt != 0 {
-					stockStr += fmt.Sprintf(" Scale PT: $%.2f ", v.StockSPt)
+
+				if err != nil {
+					stockStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.2f* - %v", v.StockTicker, OGPrice, tradeType) + "\n"
+				} else {
+					stockStr += fmt.Sprintf("**%v** starting price: *$%.2f*, current price: *$%.2f* - %v", v.StockTicker, OGPrice, newPrice, tradeType)
+					if v.StockEPt != 0 {
+						stockStr += fmt.Sprintf(" Exit PT: $%.2f ", v.StockEPt)
+					}
+					if v.StockSPt != 0 {
+						stockStr += fmt.Sprintf(" Scale PT: $%.2f ", v.StockSPt)
+					}
+					stockStr += "\n"
 				}
-				stockStr += "\n"
 			}
 		}
-	}
 
-	if len(allShorts) > 0 {
-		shortStr += "\n**__Shorts__**\n"
+		if len(allShorts) > 0 {
+			shortStr += "\n**__Shorts__**\n"
 
-		for _, v := range allShorts {
-			OGPrice := v.ShortStarting
+			for _, v := range allShorts {
+				OGPrice := v.ShortStarting
 
-			newPrice, err := stonks.GetStock(v.ShortTicker)
+				newPrice, err := stonks.GetStock(v.ShortTicker)
 
-			tradeType := ""
+				tradeType := ""
 
-			switch v.ChannelType {
-			case utils.DAY:
-				tradeType = "Day Trade"
-			case utils.SWING:
-				tradeType = "Long Trade"
-			case utils.WATCHLIST:
-				tradeType = "Watchlist"
-			}
-
-			if err != nil {
-				shortStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.2f* - %v", v.ShortTicker, OGPrice, tradeType) + "\n"
-			} else {
-				shortStr += fmt.Sprintf("**%v** starting price: *$%.2f*, current price: *$%.2f* - %v", v.ShortTicker, OGPrice, newPrice, tradeType)
-				if v.ShortEPt != 0 {
-					shortStr += fmt.Sprintf(" Exit PT: $%.2f ", v.ShortEPt)
+				switch v.ChannelType {
+				case utils.DAY:
+					tradeType = "Day Trade"
+				case utils.SWING:
+					tradeType = "Long Trade"
+				case utils.WATCHLIST:
+					tradeType = "Watchlist"
 				}
-				if v.ShortSPt != 0 {
-					shortStr += fmt.Sprintf(" Scale PT: $%.2f ", v.ShortSPt)
+
+				if err != nil {
+					shortStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.2f* - %v", v.ShortTicker, OGPrice, tradeType) + "\n"
+				} else {
+					shortStr += fmt.Sprintf("**%v** starting price: *$%.2f*, current price: *$%.2f* - %v", v.ShortTicker, OGPrice, newPrice, tradeType)
+					if v.ShortEPt != 0 {
+						shortStr += fmt.Sprintf(" Exit PT: $%.2f ", v.ShortEPt)
+					}
+					if v.ShortSPt != 0 {
+						shortStr += fmt.Sprintf(" Scale PT: $%.2f ", v.ShortSPt)
+					}
+					shortStr += "\n"
 				}
-				shortStr += "\n"
 			}
 		}
-	}
 
-	if len(allCrypto) > 0 {
-		cryptoStr += "\n**__Crypto__**\n"
+		if len(allCrypto) > 0 {
+			cryptoStr += "\n**__Crypto__**\n"
 
-		for _, v := range allCrypto {
-			OGPrice := v.CryptoStarting
+			for _, v := range allCrypto {
+				OGPrice := v.CryptoStarting
 
-			newPrice, err := stonks.GetCrypto(v.CryptoCoin, false)
-			tradeType := ""
+				newPrice, err := stonks.GetCrypto(v.CryptoCoin, false)
+				tradeType := ""
 
-			switch v.ChannelType {
-			case utils.DAY:
-				tradeType = "Day Trade"
-			case utils.SWING:
-				tradeType = "Long Trade"
-			case utils.WATCHLIST:
-				tradeType = "Watchlist"
-			}
-
-			if err != nil {
-				cryptoStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.8f* - %v", v.CryptoCoin, OGPrice, tradeType) + "\n"
-			} else {
-				cryptoStr += fmt.Sprintf("**%v** starting price: *$%.8f*, current price: *$%.8f* - %v", v.CryptoCoin, OGPrice, newPrice, tradeType)
-				if v.CryptoEPt != 0 {
-					cryptoStr += fmt.Sprintf(" Exit PT: $%.2f ", v.CryptoEPt)
+				switch v.ChannelType {
+				case utils.DAY:
+					tradeType = "Day Trade"
+				case utils.SWING:
+					tradeType = "Long Trade"
+				case utils.WATCHLIST:
+					tradeType = "Watchlist"
 				}
-				if v.CryptoSPt != 0 {
-					cryptoStr += fmt.Sprintf(" Scale PT: $%.2f ", v.CryptoSPt)
+
+				if err != nil {
+					cryptoStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.8f* - %v", v.CryptoCoin, OGPrice, tradeType) + "\n"
+				} else {
+					cryptoStr += fmt.Sprintf("**%v** starting price: *$%.8f*, current price: *$%.8f* - %v", v.CryptoCoin, OGPrice, newPrice, tradeType)
+					if v.CryptoEPt != 0 {
+						cryptoStr += fmt.Sprintf(" Exit PT: $%.2f ", v.CryptoEPt)
+					}
+					if v.CryptoSPt != 0 {
+						cryptoStr += fmt.Sprintf(" Scale PT: $%.2f ", v.CryptoSPt)
+					}
+					cryptoStr += "\n"
 				}
-				cryptoStr += "\n"
 			}
 		}
-	}
 
-	if len(allOptions) > 0 {
-		optiStr += "\n**__Options__**\n"
+		if len(allOptions) > 0 {
+			optiStr += "\n**__Options__**\n"
 
-		for _, v := range allOptions {
-			OGPrice := v.OptionStarting
-			ticker, cType, day, month, year, price, err := splitOptionsCode(v.OptionUid)
-			prettyOID := utils.NiceStr(ticker, cType, day, month, year, price)
-			if err != nil {
-				log.Println(fmt.Sprintf("Unable to parse options code for %v. It is likely in a corrupt state and should be removed: %v.", prettyOID, err.Error()))
+			for _, v := range allOptions {
+				OGPrice := v.OptionStarting
+				ticker, cType, day, month, year, price, err := splitOptionsCode(v.OptionUid)
+				prettyOID := utils.NiceStr(ticker, cType, day, month, year, price)
+				if err != nil {
+					log.Println(fmt.Sprintf("Unable to parse options code for %v. It is likely in a corrupt state and should be removed: %v.", prettyOID, err.Error()))
+				}
+
+				newPrice, _, err := stonks.GetOption(ticker, cType, day, month, year, price, 0)
+
+				tradeType := ""
+
+				switch v.ChannelType {
+				case utils.DAY:
+					tradeType = "Day Trade"
+				case utils.SWING:
+					tradeType = "Long Trade"
+				case utils.WATCHLIST:
+					tradeType = "Watchlist"
+				}
+				if err != nil {
+					log.Println(fmt.Sprintf("Unable to get option %v. Crash?: %v.", prettyOID, err.Error()))
+					optiStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.2f* - %v", prettyOID, OGPrice, tradeType) + "\n"
+				} else {
+					optiStr += fmt.Sprintf("**%v** starting price: *$%.2f*, current price: *$%.2f* - %v", prettyOID, OGPrice, newPrice, tradeType) + "\n"
+				}
 			}
+		}
 
-			newPrice, _, err := stonks.GetOption(ticker, cType, day, month, year, price, 0)
+		fmt.Println("stockStr is " + stockStr)
+		fmt.Println("shortStr is " + shortStr)
+		fmt.Println("cryptoStr is " + cryptoStr)
+		fmt.Println("optiStr is " + optiStr)
 
-			tradeType := ""
-
-			switch v.ChannelType {
-			case utils.DAY:
-				tradeType = "Day Trade"
-			case utils.SWING:
-				tradeType = "Long Trade"
-			case utils.WATCHLIST:
-				tradeType = "Watchlist"
+		if optiStr == "" && stockStr == "" && shortStr == "" && cryptoStr == "" {
+			return []string{"**No alerts to show**"}
+		} else {
+			respStrs := make([]string, 0)
+			if !IsTradingHours() {
+				respStrs = append(respStrs, "**Warning** - currently outside of market hours - data may not be accurate\n")
 			}
-			if err != nil {
-				log.Println(fmt.Sprintf("Unable to get option %v. Crash?: %v.", prettyOID, err.Error()))
-				optiStr += fmt.Sprintf("Unable to fetch current price for **%v**. Starting price: *$%.2f* - %v", prettyOID, OGPrice, tradeType) + "\n"
-			} else {
-				optiStr += fmt.Sprintf("**%v** starting price: *$%.2f*, current price: *$%.2f* - %v", prettyOID, OGPrice, newPrice, tradeType) + "\n"
+			if stockStr != "" {
+				respStrs = append(respStrs, stockStr)
 			}
-		}
-	}
-
-	fmt.Println("stockStr is " + stockStr)
-	fmt.Println("shortStr is " + shortStr)
-	fmt.Println("cryptoStr is " + cryptoStr)
-	fmt.Println("optiStr is " + optiStr)
-
-	if optiStr == "" && stockStr == "" && shortStr == "" && cryptoStr == "" {
-		return []string{"**No alerts to show**"}
-	} else {
-		respStrs := make([]string, 0)
-		if !IsTradingHours() {
-			respStrs = append(respStrs, "**Warning** - currently outside of market hours - data may not be accurate\n")
-		}
-		if stockStr != "" {
-			respStrs = append(respStrs, stockStr)
-		}
-		if shortStr != "" {
-			respStrs = append(respStrs, shortStr)
-		}
-		if cryptoStr != "" {
-			respStrs = append(respStrs, cryptoStr)
-		}
-		if optiStr != "" {
-			respStrs = append(respStrs, optiStr)
-		}
-		return respStrs
-	}
-}*/
+			if shortStr != "" {
+				respStrs = append(respStrs, shortStr)
+			}
+			if cryptoStr != "" {
+				respStrs = append(respStrs, cryptoStr)
+			}
+			if optiStr != "" {
+				respStrs = append(respStrs, optiStr)
+			}
+			return respStrs
+		}*/
+}
 
 func (d *DB) GetExitChan(guildid, index string) chan bool {
 	val, _ := chanMap.Load(guildid)
