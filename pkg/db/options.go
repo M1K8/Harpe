@@ -73,7 +73,7 @@ func (d *DB) CreateOption(guildID, oID, author string, channelType int, ticker, 
 	return exitChan, oID, exists, nil
 }
 
-func (d *DB) RemoveOption(guildID, oID, ticker, contractType, day, month, year string, price float32) error {
+func (d *DB) RemoveOption(guildID, oID, contractType, day, month, year string, price float32) error {
 	if len(year) != 4 {
 		return errors.New("invalid Syntax - year is incorrect")
 	}
