@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// TODO - read / write  Max | Min. Here and repo
 package db
 
 import (
