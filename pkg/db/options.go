@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateOption(guildID, oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, underStart float32) (chan bool, string, bool, error) {
+func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, underStart float32) (chan bool, string, bool, error) {
 
 	if len(year) != 4 {
 		return nil, "", false, errors.New("invalid Syntax - year is incorrect")
@@ -38,8 +38,8 @@ func (d *DB) CreateOption(guildID, oID, author string, channelType int, ticker, 
 		return nil, "", false, errors.New("invalid Syntax - day is incorrect")
 	}
 	s := &Option{
-		OptionAlertID:            oID + "_" + guildID,
-		OptionGuildID:            guildID,
+		OptionAlertID:            oID + "_" + d.guild,
+		OptionGuildID:            d.guild,
 		OptionTicker:             ticker,
 		OptionUid:                oID,
 		OptionDay:                day,
@@ -67,13 +67,13 @@ func (d *DB) CreateOption(guildID, oID, author string, channelType int, ticker, 
 
 	exitChan := make(chan bool, 1)
 
-	chanMap.LoadOrStore(guildID, &sync.Map{})
-	exists, exitChan := d.getExitChanExists(guildID, oID, exitChan)
+	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	exists, exitChan := d.getExitChanExists(oID, exitChan)
 
 	return exitChan, oID, exists, nil
 }
 
-func (d *DB) RemoveOption(guildID, oID, contractType, day, month, year string, price float32) error {
+func (d *DB) RemoveOption(oID, contractType, day, month, year string, price float32) error {
 	if len(year) != 4 {
 		return errors.New("invalid Syntax - year is incorrect")
 	}
@@ -97,55 +97,55 @@ func (d *DB) RemoveOption(guildID, oID, contractType, day, month, year string, p
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID:  guildID,
+		OptionGuildID:  d.guild,
 		OptionUid:      oID,
 		OptionStarting: 0,
 		OptionCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+guildID).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete option %v: %v.", oID, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, guildID, oID)
+	clearFromSyncMap(chanMap, d.guild, oID)
 	return nil
 }
 
-func (d *DB) RemoveOptionByCode(guildID, oID string) error {
+func (d *DB) RemoveOptionByCode(oID string) error {
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID:  guildID,
+		OptionGuildID:  d.guild,
 		OptionUid:      oID,
 		OptionStarting: 0,
 		OptionCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+guildID).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to remove option %v: %v.", oID, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, guildID, oID)
+	clearFromSyncMap(chanMap, d.guild, oID)
 	return nil
 }
 
-func (d *DB) GetOption(guildID, oID string) (*Option, error) {
+func (d *DB) GetOption(oID string) (*Option, error) {
 
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID: guildID,
+		OptionGuildID: d.guild,
 		OptionUid:     oID,
 	}
-	err := d.db.NewSelect().Model(s).Where("option_alert_id = ?", oID+"_"+guildID).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("option_alert_id = ?", oID+"_"+d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get option %v: %v.", oID, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(guildID)
+	gMap, ok := chanMap.Load(d.guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load(oID)
@@ -157,9 +157,9 @@ func (d *DB) GetOption(guildID, oID string) (*Option, error) {
 	return s, nil
 }
 
-func (d *DB) OptionPOIHit(guildID, oID string) error {
+func (d *DB) OptionPOIHit(oID string) error {
 	contxt := context.Background()
-	s, err := d.GetOption(guildID, oID)
+	s, err := d.GetOption(oID)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get option %v : %v", oID, err.Error()))
 		return err
@@ -177,10 +177,10 @@ func (d *DB) OptionPOIHit(guildID, oID string) error {
 	return nil
 }
 
-func (d *DB) OptionSetNewHigh(guildID, uid string, price float32) error {
+func (d *DB) OptionSetNewHigh(uid string, price float32) error {
 	contxt := context.Background()
 
-	s, err := d.GetOption(guildID, uid)
+	s, err := d.GetOption(uid)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Option %v : %v", uid, err.Error()))
 		return err

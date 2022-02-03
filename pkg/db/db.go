@@ -110,7 +110,7 @@ func NewDB(guildID string) *DB {
 	}
 }
 
-func (d *DB) RmAll(guildID string) error {
+func (d *DB) RmAll() error {
 	contxt := context.Background()
 
 	allStocks := make([]*Stock, 0)
@@ -119,7 +119,7 @@ func (d *DB) RmAll(guildID string) error {
 	allCrypto := make([]*Crypto, 0)
 	log.Println("Nuke called!!!!!!!!!!!!!!!!!!!!!!")
 
-	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", guildID).Scan(contxt, &allStocks)
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.guild).Scan(contxt, &allStocks)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
@@ -128,10 +128,10 @@ func (d *DB) RmAll(guildID string) error {
 
 	for _, v := range allStocks {
 		log.Println("removing " + v.StockTicker)
-		d.RemoveStock(guildID, v.StockTicker)
+		d.RemoveStock(v.StockTicker)
 	}
 
-	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", guildID).Scan(contxt, &allShorts)
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.guild).Scan(contxt, &allShorts)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
@@ -140,10 +140,10 @@ func (d *DB) RmAll(guildID string) error {
 
 	for _, v := range allShorts {
 		log.Println("removing " + v.ShortTicker)
-		d.RemoveShort(guildID, v.ShortTicker)
+		d.RemoveShort(v.ShortTicker)
 	}
 
-	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", guildID).Scan(contxt, &allCrypto)
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.guild).Scan(contxt, &allCrypto)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
@@ -152,10 +152,10 @@ func (d *DB) RmAll(guildID string) error {
 
 	for _, v := range allCrypto {
 		log.Println("removing " + v.CryptoCoin)
-		d.RemoveCrypto(guildID, v.CryptoCoin)
+		d.RemoveCrypto(v.CryptoCoin)
 	}
 
-	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", guildID).Scan(contxt, &allOptions)
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.guild).Scan(contxt, &allOptions)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
@@ -164,7 +164,7 @@ func (d *DB) RmAll(guildID string) error {
 
 	for _, v := range allOptions {
 		log.Println("removing " + v.OptionUid)
-		d.RemoveOptionByCode(guildID, v.OptionUid)
+		d.RemoveOptionByCode(v.OptionUid)
 	}
 
 	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
@@ -172,35 +172,35 @@ func (d *DB) RmAll(guildID string) error {
 	return nil
 }
 
-func (d *DB) GetAll(guildID string) ([]*Stock, []*Short, []*Crypto, []*Option, error) {
+func (d *DB) GetAll() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	contxt := context.Background()
 	allStocks := make([]*Stock, 0)
 	allShorts := make([]*Short, 0)
 	allOptions := make([]*Option, 0)
 	allCrypto := make([]*Crypto, 0)
 
-	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", guildID).Scan(contxt, &allStocks)
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.guild).Scan(contxt, &allStocks)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", guildID).Scan(contxt, &allShorts)
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.guild).Scan(contxt, &allShorts)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", guildID).Scan(contxt, &allCrypto)
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.guild).Scan(contxt, &allCrypto)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", guildID).Scan(contxt, &allOptions)
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.guild).Scan(contxt, &allOptions)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
@@ -211,8 +211,8 @@ func (d *DB) GetAll(guildID string) ([]*Stock, []*Short, []*Crypto, []*Option, e
 
 }
 
-func (d *DB) GetExitChan(guildid, index string) chan bool {
-	val, _ := chanMap.Load(guildid)
+func (d *DB) GetExitChan(index string) chan bool {
+	val, _ := chanMap.Load(d.guild)
 
 	gMap := val.(*sync.Map)
 	gVal, ok := gMap.Load(index)
@@ -224,8 +224,8 @@ func (d *DB) GetExitChan(guildid, index string) chan bool {
 	}
 }
 
-func (d *DB) getExitChanExists(guildid, index string, exitChan chan bool) (bool, chan bool) {
-	val, _ := chanMap.Load(guildid)
+func (d *DB) getExitChanExists(index string, exitChan chan bool) (bool, chan bool) {
+	val, _ := chanMap.Load(d.guild)
 
 	gMap := val.(*sync.Map)
 	gVal, ok := gMap.LoadOrStore(index, exitChan)
@@ -237,8 +237,8 @@ func (d *DB) getExitChanExists(guildid, index string, exitChan chan bool) (bool,
 	}
 }
 
-func (d *DB) SetAndReturnNewExitChan(guildid, index string, exitChan chan bool) chan bool {
-	val, _ := chanMap.LoadOrStore(guildid, &sync.Map{})
+func (d *DB) SetAndReturnNewExitChan(index string, exitChan chan bool) chan bool {
+	val, _ := chanMap.LoadOrStore(d.guild, &sync.Map{})
 
 	gMap := val.(*sync.Map)
 	gMap.Store(index, exitChan)
@@ -246,42 +246,42 @@ func (d *DB) SetAndReturnNewExitChan(guildid, index string, exitChan chan bool) 
 	return exitChan
 }
 
-func (d *DB) RefreshFromDB(guildID string) ([]*Stock, []*Short, []*Option, []*Crypto, error) {
+func (d *DB) RefreshFromDB() ([]*Stock, []*Short, []*Option, []*Crypto, error) {
 	contxt := context.Background()
 	allStocks := make([]*Stock, 0)
 	allShorts := make([]*Short, 0)
 	allOptions := make([]*Option, 0)
 	allCrypto := make([]*Crypto, 0)
 
-	err := d.db.NewSelect().Model(&allStocks).Where("stock_guild_id = ?", guildID).Scan(contxt)
+	err := d.db.NewSelect().Model(&allStocks).Where("stock_guild_id = ?", d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model(&allShorts).Where("short_guild_id = ?", guildID).Scan(contxt)
+	err = d.db.NewSelect().Model(&allShorts).Where("short_guild_id = ?", d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model(&allCrypto).Where("crypto_guild_id = ?", guildID).Scan(contxt)
+	err = d.db.NewSelect().Model(&allCrypto).Where("crypto_guild_id = ?", d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model(&allOptions).Where("option_guild_id = ?", guildID).Scan(contxt)
+	err = d.db.NewSelect().Model(&allOptions).Where("option_guild_id = ?", d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	chanMap.LoadOrStore(guildID, &sync.Map{})
+	chanMap.LoadOrStore(d.guild, &sync.Map{})
 
 	return allStocks, allShorts, allOptions, allCrypto, nil
 }

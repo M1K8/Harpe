@@ -23,12 +23,12 @@ import (
 	"time"
 )
 
-func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, channelType int, guildID string, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, channelType int, starting float32) (chan bool, bool, error) {
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoAlertID:  coin + "_" + guildID,
-		CryptoGuildID:  guildID,
+		CryptoAlertID:  coin + "_" + d.guild,
+		CryptoGuildID:  d.guild,
 		CryptoCoin:     coin,
 		CryptoStarting: starting,
 		CryptoHighest:  starting,
@@ -50,49 +50,49 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, chan
 	}
 
 	exitChan := make(chan bool, 1)
-	chanMap.LoadOrStore(guildID, &sync.Map{})
-	exists, exitChan := d.getExitChanExists(guildID, "c_"+coin, exitChan)
+	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	exists, exitChan := d.getExitChanExists("c_"+coin, exitChan)
 
 	return exitChan, exists, nil
 }
 
-func (d *DB) RemoveCrypto(guildID, coin string) error {
+func (d *DB) RemoveCrypto(coin string) error {
 
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoGuildID:  guildID,
+		CryptoGuildID:  d.guild,
 		CryptoCoin:     coin,
 		CryptoStarting: 0,
 		CryptoCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", coin+"_"+guildID).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to remove Crypto %v : %v", coin, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, guildID, "c_"+coin)
+	clearFromSyncMap(chanMap, d.guild, "c_"+coin)
 	return nil
 }
 
-func (d *DB) GetCrypto(guildID, coin string) (*Crypto, error) {
+func (d *DB) GetCrypto(coin string) (*Crypto, error) {
 
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoGuildID:  guildID,
+		CryptoGuildID:  d.guild,
 		CryptoCoin:     coin,
 		CryptoStarting: 0,
 		CryptoCallTime: time.Time{},
 	}
-	err := d.db.NewSelect().Model(s).Where("crypto_alert_id = ?", coin+"_"+guildID).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Crypto %v : %v", coin, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(guildID)
+	gMap, ok := chanMap.Load(d.guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load("c_" + coin)
@@ -105,10 +105,10 @@ func (d *DB) GetCrypto(guildID, coin string) (*Crypto, error) {
 	return s, nil
 }
 
-func (d *DB) CryptoPOIHit(guildID, coin string) error {
+func (d *DB) CryptoPOIHit(coin string) error {
 	contxt := context.Background()
 
-	s, err := d.GetCrypto(guildID, coin)
+	s, err := d.GetCrypto(coin)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Crypto %v : %v", coin, err.Error()))
 		return err
@@ -126,10 +126,10 @@ func (d *DB) CryptoPOIHit(guildID, coin string) error {
 	return nil
 }
 
-func (d *DB) CryptoSetNewHigh(guildID, coin string, price float32) error {
+func (d *DB) CryptoSetNewHigh(coin string, price float32) error {
 	contxt := context.Background()
 
-	s, err := d.GetCrypto(guildID, coin)
+	s, err := d.GetCrypto(coin)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Crypto %v : %v", coin, err.Error()))
 		return err

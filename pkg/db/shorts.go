@@ -23,12 +23,12 @@ import (
 	"time"
 )
 
-func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, guildID string, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
 	contxt := context.Background()
 
 	s := &Short{
-		ShortAlertID:  guildID + "_" + stock,
-		ShortGuildID:  guildID,
+		ShortAlertID:  d.guild + "_" + stock,
+		ShortGuildID:  d.guild,
 		ShortTicker:   stock,
 		ShortSPt:      spt,
 		ShortEPt:      ept,
@@ -51,49 +51,49 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 	}
 
 	exitChan := make(chan bool, 1)
-	chanMap.LoadOrStore(guildID, &sync.Map{})
-	exists, exitChan := d.getExitChanExists(guildID, "sh_"+stock, exitChan)
+	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	exists, exitChan := d.getExitChanExists("sh_"+stock, exitChan)
 
 	return exitChan, exists, nil
 }
 
-func (d *DB) RemoveShort(guildID, stock string) error {
+func (d *DB) RemoveShort(stock string) error {
 
 	contxt := context.Background()
 
 	s := &Short{
-		ShortGuildID:  guildID,
+		ShortGuildID:  d.guild,
 		ShortTicker:   stock,
 		ShortStarting: 0,
 		ShortCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("short_alert_id = ?", stock+"_"+guildID).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("short_alert_id = ?", stock+"_"+d.guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete short %v : %v", stock, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, guildID, "sh_"+stock)
+	clearFromSyncMap(chanMap, d.guild, "sh_"+stock)
 	return nil
 }
 
-func (d *DB) GetShort(guildID, stock string) (*Short, error) {
+func (d *DB) GetShort(stock string) (*Short, error) {
 
 	contxt := context.Background()
 
 	s := &Short{
-		ShortGuildID:  guildID,
+		ShortGuildID:  d.guild,
 		ShortTicker:   stock,
 		ShortStarting: 0,
 		ShortCallTime: time.Time{},
 	}
-	err := d.db.NewSelect().Model(s).Where("short_alert_id = ?", stock+"_"+guildID).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("short_alert_id = ?", stock+"_"+d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get short %v : %v", stock, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(guildID)
+	gMap, ok := chanMap.Load(d.guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load("sh_" + stock)
@@ -105,10 +105,10 @@ func (d *DB) GetShort(guildID, stock string) (*Short, error) {
 	return s, nil
 }
 
-func (d *DB) ShortPOIHit(guildID, ticker string) error {
+func (d *DB) ShortPOIHit(ticker string) error {
 	contxt := context.Background()
 
-	s, err := d.GetShort(guildID, ticker)
+	s, err := d.GetShort(ticker)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get short %v : %v", ticker, err.Error()))
 		return err
@@ -126,10 +126,10 @@ func (d *DB) ShortPOIHit(guildID, ticker string) error {
 	return nil
 }
 
-func (d *DB) ShortSetNewHigh(guildID, uid string, price float32) error {
+func (d *DB) ShortSetNewHigh(uid string, price float32) error {
 	contxt := context.Background()
 
-	s, err := d.GetShort(guildID, uid)
+	s, err := d.GetShort(uid)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get short %v : %v", uid, err.Error()))
 		return err

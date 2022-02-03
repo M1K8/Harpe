@@ -24,11 +24,11 @@ import (
 	"time"
 )
 
-func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, guildID string, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
 	contxt := context.Background()
 	s := &Stock{
-		StockAlertID:  stock + "_" + guildID,
-		StockGuildID:  guildID,
+		StockAlertID:  stock + "_" + d.guild,
+		StockGuildID:  d.guild,
 		StockTicker:   stock,
 		StockEPt:      ept,
 		StockSPt:      spt,
@@ -51,50 +51,50 @@ func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, s
 	}
 
 	exitChan := make(chan bool, 1)
-	chanMap.LoadOrStore(guildID, &sync.Map{})
-	exists, exitChan := d.getExitChanExists(guildID, "s_"+stock, exitChan)
+	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	exists, exitChan := d.getExitChanExists("s_"+stock, exitChan)
 
 	return exitChan, exists, nil
 }
 
-func (d *DB) RemoveStock(guildID, stock string) error {
+func (d *DB) RemoveStock(stock string) error {
 
 	contxt := context.Background()
 
 	s := &Stock{
-		StockGuildID:  guildID,
+		StockGuildID:  d.guild,
 		StockTicker:   stock,
 		StockStarting: 0,
 		StockCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("stock_alert_id = ?", stock+"_"+guildID).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("stock_alert_id = ?", stock+"_"+d.guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete Stock %v : %v", stock, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, guildID, "s_"+stock)
+	clearFromSyncMap(chanMap, d.guild, "s_"+stock)
 	return nil
 }
 
-func (d *DB) GetStock(guildID, stock string) (*Stock, error) {
+func (d *DB) GetStock(stock string) (*Stock, error) {
 
 	contxt := context.Background()
 	stock = strings.ToUpper(stock)
 
 	s := &Stock{
-		StockGuildID:  guildID,
+		StockGuildID:  d.guild,
 		StockTicker:   stock,
 		StockStarting: 0,
 		StockCallTime: time.Time{},
 	}
-	err := d.db.NewSelect().Model(s).Where("stock_alert_id = ?", stock+"_"+guildID).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("stock_alert_id = ?", stock+"_"+d.guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Stock %v : %v", stock, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(guildID)
+	gMap, ok := chanMap.Load(d.guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load("s_" + stock)
@@ -106,10 +106,10 @@ func (d *DB) GetStock(guildID, stock string) (*Stock, error) {
 	return s, nil
 }
 
-func (d *DB) StockPOIHit(guildID, ticker string) error {
+func (d *DB) StockPOIHit(ticker string) error {
 	contxt := context.Background()
 
-	s, err := d.GetStock(guildID, ticker)
+	s, err := d.GetStock(ticker)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stock %v : %v", ticker, err.Error()))
 		return err
@@ -127,10 +127,10 @@ func (d *DB) StockPOIHit(guildID, ticker string) error {
 	return nil
 }
 
-func (d *DB) StockSetNewHigh(guildID, uid string, price float32) error {
+func (d *DB) StockSetNewHigh(uid string, price float32) error {
 	contxt := context.Background()
 
-	s, err := d.GetStock(guildID, uid)
+	s, err := d.GetStock(uid)
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Stock %v : %v", uid, err.Error()))
 		return err
