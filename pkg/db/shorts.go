@@ -27,8 +27,8 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 	contxt := context.Background()
 
 	s := &Short{
-		ShortAlertID:  d.guild + "_" + stock,
-		ShortGuildID:  d.guild,
+		ShortAlertID:  d.Guild + "_" + stock,
+		ShortGuildID:  d.Guild,
 		ShortTicker:   stock,
 		ShortSPt:      spt,
 		ShortEPt:      ept,
@@ -51,7 +51,7 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 	}
 
 	exitChan := make(chan bool, 1)
-	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.getExitChanExists("sh_"+stock, exitChan)
 
 	return exitChan, exists, nil
@@ -62,18 +62,18 @@ func (d *DB) RemoveShort(stock string) error {
 	contxt := context.Background()
 
 	s := &Short{
-		ShortGuildID:  d.guild,
+		ShortGuildID:  d.Guild,
 		ShortTicker:   stock,
 		ShortStarting: 0,
 		ShortCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("short_alert_id = ?", stock+"_"+d.guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("short_alert_id = ?", stock+"_"+d.Guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete short %v : %v", stock, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.guild, "sh_"+stock)
+	clearFromSyncMap(chanMap, d.Guild, "sh_"+stock)
 	return nil
 }
 
@@ -82,18 +82,18 @@ func (d *DB) GetShort(stock string) (*Short, error) {
 	contxt := context.Background()
 
 	s := &Short{
-		ShortGuildID:  d.guild,
+		ShortGuildID:  d.Guild,
 		ShortTicker:   stock,
 		ShortStarting: 0,
 		ShortCallTime: time.Time{},
 	}
-	err := d.db.NewSelect().Model(s).Where("short_alert_id = ?", stock+"_"+d.guild).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("short_alert_id = ?", stock+"_"+d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get short %v : %v", stock, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(d.guild)
+	gMap, ok := chanMap.Load(d.Guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load("sh_" + stock)

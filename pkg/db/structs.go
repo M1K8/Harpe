@@ -98,6 +98,6 @@ type Crypto struct {
 }
 
 type DB struct {
-	guild string
+	Guild string
 	db    *bun.DB
 }

@@ -105,7 +105,7 @@ func NewDB(guildID string) *DB {
 	}
 
 	return &DB{
-		guild: guildID,
+		Guild: guildID,
 		db:    client,
 	}
 }
@@ -119,7 +119,7 @@ func (d *DB) RmAll() error {
 	allCrypto := make([]*Crypto, 0)
 	log.Println("Nuke called!!!!!!!!!!!!!!!!!!!!!!")
 
-	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.guild).Scan(contxt, &allStocks)
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.Guild).Scan(contxt, &allStocks)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
@@ -131,7 +131,7 @@ func (d *DB) RmAll() error {
 		d.RemoveStock(v.StockTicker)
 	}
 
-	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.guild).Scan(contxt, &allShorts)
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Scan(contxt, &allShorts)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
@@ -143,7 +143,7 @@ func (d *DB) RmAll() error {
 		d.RemoveShort(v.ShortTicker)
 	}
 
-	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.guild).Scan(contxt, &allCrypto)
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Scan(contxt, &allCrypto)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
@@ -155,7 +155,7 @@ func (d *DB) RmAll() error {
 		d.RemoveCrypto(v.CryptoCoin)
 	}
 
-	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.guild).Scan(contxt, &allOptions)
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Scan(contxt, &allOptions)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
@@ -179,28 +179,28 @@ func (d *DB) GetAll() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	allOptions := make([]*Option, 0)
 	allCrypto := make([]*Crypto, 0)
 
-	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.guild).Scan(contxt, &allStocks)
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.Guild).Scan(contxt, &allStocks)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.guild).Scan(contxt, &allShorts)
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Scan(contxt, &allShorts)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.guild).Scan(contxt, &allCrypto)
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Scan(contxt, &allCrypto)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.guild).Scan(contxt, &allOptions)
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Scan(contxt, &allOptions)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
@@ -212,7 +212,7 @@ func (d *DB) GetAll() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 }
 
 func (d *DB) GetExitChan(index string) chan bool {
-	val, _ := chanMap.Load(d.guild)
+	val, _ := chanMap.Load(d.Guild)
 
 	gMap := val.(*sync.Map)
 	gVal, ok := gMap.Load(index)
@@ -225,7 +225,7 @@ func (d *DB) GetExitChan(index string) chan bool {
 }
 
 func (d *DB) getExitChanExists(index string, exitChan chan bool) (bool, chan bool) {
-	val, _ := chanMap.Load(d.guild)
+	val, _ := chanMap.Load(d.Guild)
 
 	gMap := val.(*sync.Map)
 	gVal, ok := gMap.LoadOrStore(index, exitChan)
@@ -238,7 +238,7 @@ func (d *DB) getExitChanExists(index string, exitChan chan bool) (bool, chan boo
 }
 
 func (d *DB) SetAndReturnNewExitChan(index string, exitChan chan bool) chan bool {
-	val, _ := chanMap.LoadOrStore(d.guild, &sync.Map{})
+	val, _ := chanMap.LoadOrStore(d.Guild, &sync.Map{})
 
 	gMap := val.(*sync.Map)
 	gMap.Store(index, exitChan)
@@ -253,35 +253,35 @@ func (d *DB) RefreshFromDB() ([]*Stock, []*Short, []*Option, []*Crypto, error) {
 	allOptions := make([]*Option, 0)
 	allCrypto := make([]*Crypto, 0)
 
-	err := d.db.NewSelect().Model(&allStocks).Where("stock_guild_id = ?", d.guild).Scan(contxt)
+	err := d.db.NewSelect().Model(&allStocks).Where("stock_guild_id = ?", d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model(&allShorts).Where("short_guild_id = ?", d.guild).Scan(contxt)
+	err = d.db.NewSelect().Model(&allShorts).Where("short_guild_id = ?", d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model(&allCrypto).Where("crypto_guild_id = ?", d.guild).Scan(contxt)
+	err = d.db.NewSelect().Model(&allCrypto).Where("crypto_guild_id = ?", d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	err = d.db.NewSelect().Model(&allOptions).Where("option_guild_id = ?", d.guild).Scan(contxt)
+	err = d.db.NewSelect().Model(&allOptions).Where("option_guild_id = ?", d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
 		return nil, nil, nil, nil, err
 	}
 
-	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 
 	return allStocks, allShorts, allOptions, allCrypto, nil
 }

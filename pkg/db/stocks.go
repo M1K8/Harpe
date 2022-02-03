@@ -27,8 +27,8 @@ import (
 func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
 	contxt := context.Background()
 	s := &Stock{
-		StockAlertID:  stock + "_" + d.guild,
-		StockGuildID:  d.guild,
+		StockAlertID:  stock + "_" + d.Guild,
+		StockGuildID:  d.Guild,
 		StockTicker:   stock,
 		StockEPt:      ept,
 		StockSPt:      spt,
@@ -51,7 +51,7 @@ func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, s
 	}
 
 	exitChan := make(chan bool, 1)
-	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.getExitChanExists("s_"+stock, exitChan)
 
 	return exitChan, exists, nil
@@ -62,18 +62,18 @@ func (d *DB) RemoveStock(stock string) error {
 	contxt := context.Background()
 
 	s := &Stock{
-		StockGuildID:  d.guild,
+		StockGuildID:  d.Guild,
 		StockTicker:   stock,
 		StockStarting: 0,
 		StockCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("stock_alert_id = ?", stock+"_"+d.guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("stock_alert_id = ?", stock+"_"+d.Guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete Stock %v : %v", stock, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.guild, "s_"+stock)
+	clearFromSyncMap(chanMap, d.Guild, "s_"+stock)
 	return nil
 }
 
@@ -83,18 +83,18 @@ func (d *DB) GetStock(stock string) (*Stock, error) {
 	stock = strings.ToUpper(stock)
 
 	s := &Stock{
-		StockGuildID:  d.guild,
+		StockGuildID:  d.Guild,
 		StockTicker:   stock,
 		StockStarting: 0,
 		StockCallTime: time.Time{},
 	}
-	err := d.db.NewSelect().Model(s).Where("stock_alert_id = ?", stock+"_"+d.guild).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("stock_alert_id = ?", stock+"_"+d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Stock %v : %v", stock, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(d.guild)
+	gMap, ok := chanMap.Load(d.Guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load("s_" + stock)

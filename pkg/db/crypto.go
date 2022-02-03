@@ -27,8 +27,8 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, chan
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoAlertID:  coin + "_" + d.guild,
-		CryptoGuildID:  d.guild,
+		CryptoAlertID:  coin + "_" + d.Guild,
+		CryptoGuildID:  d.Guild,
 		CryptoCoin:     coin,
 		CryptoStarting: starting,
 		CryptoHighest:  starting,
@@ -50,7 +50,7 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, chan
 	}
 
 	exitChan := make(chan bool, 1)
-	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.getExitChanExists("c_"+coin, exitChan)
 
 	return exitChan, exists, nil
@@ -61,18 +61,18 @@ func (d *DB) RemoveCrypto(coin string) error {
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoGuildID:  d.guild,
+		CryptoGuildID:  d.Guild,
 		CryptoCoin:     coin,
 		CryptoStarting: 0,
 		CryptoCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.Guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to remove Crypto %v : %v", coin, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.guild, "c_"+coin)
+	clearFromSyncMap(chanMap, d.Guild, "c_"+coin)
 	return nil
 }
 
@@ -81,18 +81,18 @@ func (d *DB) GetCrypto(coin string) (*Crypto, error) {
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoGuildID:  d.guild,
+		CryptoGuildID:  d.Guild,
 		CryptoCoin:     coin,
 		CryptoStarting: 0,
 		CryptoCallTime: time.Time{},
 	}
-	err := d.db.NewSelect().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.guild).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get Crypto %v : %v", coin, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(d.guild)
+	gMap, ok := chanMap.Load(d.Guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load("c_" + coin)

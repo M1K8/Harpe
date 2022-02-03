@@ -38,8 +38,8 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 		return nil, "", false, errors.New("invalid Syntax - day is incorrect")
 	}
 	s := &Option{
-		OptionAlertID:            oID + "_" + d.guild,
-		OptionGuildID:            d.guild,
+		OptionAlertID:            oID + "_" + d.Guild,
+		OptionGuildID:            d.Guild,
 		OptionTicker:             ticker,
 		OptionUid:                oID,
 		OptionDay:                day,
@@ -67,7 +67,7 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 
 	exitChan := make(chan bool, 1)
 
-	chanMap.LoadOrStore(d.guild, &sync.Map{})
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.getExitChanExists(oID, exitChan)
 
 	return exitChan, oID, exists, nil
@@ -97,18 +97,18 @@ func (d *DB) RemoveOption(oID, contractType, day, month, year string, price floa
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID:  d.guild,
+		OptionGuildID:  d.Guild,
 		OptionUid:      oID,
 		OptionStarting: 0,
 		OptionCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete option %v: %v.", oID, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.guild, oID)
+	clearFromSyncMap(chanMap, d.Guild, oID)
 	return nil
 }
 
@@ -116,18 +116,18 @@ func (d *DB) RemoveOptionByCode(oID string) error {
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID:  d.guild,
+		OptionGuildID:  d.Guild,
 		OptionUid:      oID,
 		OptionStarting: 0,
 		OptionCallTime: time.Time{},
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to remove option %v: %v.", oID, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.guild, oID)
+	clearFromSyncMap(chanMap, d.Guild, oID)
 	return nil
 }
 
@@ -136,16 +136,16 @@ func (d *DB) GetOption(oID string) (*Option, error) {
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID: d.guild,
+		OptionGuildID: d.Guild,
 		OptionUid:     oID,
 	}
-	err := d.db.NewSelect().Model(s).Where("option_alert_id = ?", oID+"_"+d.guild).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Scan(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get option %v: %v.", oID, err.Error()))
 		return nil, err
 	}
-	gMap, ok := chanMap.Load(d.guild)
+	gMap, ok := chanMap.Load(d.Guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load(oID)
