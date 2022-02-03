@@ -246,7 +246,7 @@ func (d *DB) SetAndReturnNewExitChan(index string, exitChan chan bool) chan bool
 	return exitChan
 }
 
-func (d *DB) RefreshFromDB() ([]*Stock, []*Short, []*Option, []*Crypto, error) {
+func (d *DB) RefreshFromDB() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	contxt := context.Background()
 	allStocks := make([]*Stock, 0)
 	allShorts := make([]*Short, 0)
@@ -283,7 +283,7 @@ func (d *DB) RefreshFromDB() ([]*Stock, []*Short, []*Option, []*Crypto, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 
-	return allStocks, allShorts, allOptions, allCrypto, nil
+	return allStocks, allShorts, allCrypto, allOptions, nil
 }
 
 func SplitOptionsCode(code string) (string, string, string, string, string, float32, error) {
