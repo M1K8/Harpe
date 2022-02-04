@@ -65,10 +65,8 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 		return nil, oID, false, err
 	}
 
-	exitChan := make(chan bool, 1)
-
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists(oID, exitChan)
+	exists, exitChan := d.getExitChanExists(oID)
 
 	return exitChan, oID, exists, nil
 }

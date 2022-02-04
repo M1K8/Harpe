@@ -50,9 +50,8 @@ func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, s
 		return nil, false, err
 	}
 
-	exitChan := make(chan bool, 1)
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists("s_"+stock, exitChan)
+	exists, exitChan := d.getExitChanExists("s_" + stock)
 
 	return exitChan, exists, nil
 }

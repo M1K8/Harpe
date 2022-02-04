@@ -49,9 +49,8 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, chan
 		return nil, false, err
 	}
 
-	exitChan := make(chan bool, 1)
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists("c_"+coin, exitChan)
+	exists, exitChan := d.getExitChanExists("c_" + coin)
 
 	return exitChan, exists, nil
 }

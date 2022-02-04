@@ -36,7 +36,7 @@ import (
 
 var once = sync.Once{}
 var client *bun.DB
-var chanMap sync.Map
+var chanMap = sync.Map{}
 
 func NewDB(guildID string) *DB {
 	contxt := context.Background()
@@ -97,7 +97,6 @@ func NewDB(guildID string) *DB {
 		}
 
 		client = db
-		chanMap = sync.Map{}
 	})
 
 	if client == nil {
@@ -224,8 +223,9 @@ func (d *DB) GetExitChan(index string) chan bool {
 	}
 }
 
-func (d *DB) getExitChanExists(index string, exitChan chan bool) (bool, chan bool) {
+func (d *DB) getExitChanExists(index string) (bool, chan bool) {
 	val, _ := chanMap.Load(d.Guild)
+	exitChan := make(chan bool, 1)
 
 	gMap := val.(*sync.Map)
 	gVal, ok := gMap.LoadOrStore(index, exitChan)
