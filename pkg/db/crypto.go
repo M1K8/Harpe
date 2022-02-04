@@ -24,6 +24,13 @@ import (
 )
 
 func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, channelType int, starting float32) (chan bool, bool, error) {
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
+	exists, exitChan := d.GetExitChanExists("c_" + coin)
+
+	if exists {
+		return exitChan, exists, nil
+	}
+
 	contxt := context.Background()
 
 	s := &Crypto{
@@ -48,9 +55,6 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, chan
 		log.Println(fmt.Sprintf("Unable to create Crypto %v : %v", coin, err.Error()))
 		return nil, false, err
 	}
-
-	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists("c_" + coin)
 
 	return exitChan, exists, nil
 }

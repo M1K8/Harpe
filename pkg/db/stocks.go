@@ -25,6 +25,14 @@ import (
 )
 
 func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
+
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
+	exists, exitChan := d.GetExitChanExists("s_" + stock)
+
+	if exists {
+		return exitChan, exists, nil
+	}
+
 	contxt := context.Background()
 	s := &Stock{
 		StockAlertID:  stock + "_" + d.Guild,
@@ -49,9 +57,6 @@ func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, s
 		log.Println(fmt.Sprintf("Unable to create Crypto %v : %v", stock, err.Error()))
 		return nil, false, err
 	}
-
-	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists("s_" + stock)
 
 	return exitChan, exists, nil
 }

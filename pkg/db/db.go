@@ -223,7 +223,7 @@ func (d *DB) GetExitChan(index string) chan bool {
 	}
 }
 
-func (d *DB) getExitChanExists(index string) (bool, chan bool) {
+func (d *DB) GetExitChanExists(index string) (bool, chan bool) {
 	val, _ := chanMap.Load(d.Guild)
 	exitChan := make(chan bool, 1)
 
@@ -231,6 +231,7 @@ func (d *DB) getExitChanExists(index string) (bool, chan bool) {
 	gVal, ok := gMap.LoadOrStore(index, exitChan)
 
 	if ok {
+		log.Println("Alert " + index + " exists!")
 		return true, gVal.(chan bool)
 	} else {
 		return false, exitChan

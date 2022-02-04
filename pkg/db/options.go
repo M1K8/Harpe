@@ -26,6 +26,13 @@ import (
 
 func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, underStart float32) (chan bool, string, bool, error) {
 
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
+	exists, exitChan := d.GetExitChanExists(oID)
+
+	if exists {
+		return exitChan, oID, exists, nil
+	}
+
 	if len(year) != 4 {
 		return nil, "", false, errors.New("invalid Syntax - year is incorrect")
 	}
@@ -64,9 +71,6 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 		log.Println(fmt.Sprintf("Unable to create option %v: %v.", oID, err.Error()))
 		return nil, oID, false, err
 	}
-
-	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists(oID)
 
 	return exitChan, oID, exists, nil
 }

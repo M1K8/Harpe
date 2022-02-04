@@ -24,6 +24,14 @@ import (
 )
 
 func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
+
+	chanMap.LoadOrStore(d.Guild, &sync.Map{})
+	exists, exitChan := d.GetExitChanExists("sh_" + stock)
+
+	if exists {
+		return exitChan, exists, nil
+	}
+
 	contxt := context.Background()
 
 	s := &Short{
@@ -49,9 +57,6 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 		log.Println(fmt.Sprintf("Unable to create short %v : %v", stock, err.Error()))
 		return nil, false, err
 	}
-
-	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.getExitChanExists("sh_" + stock)
 
 	return exitChan, exists, nil
 }
