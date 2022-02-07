@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -84,7 +85,7 @@ func (d *DB) RemoveShort(stock string) error {
 func (d *DB) GetShort(stock string) (*Short, error) {
 
 	contxt := context.Background()
-
+	stock = strings.ToUpper(stock)
 	s := &Short{
 		ShortGuildID:  d.Guild,
 		ShortTicker:   stock,
