@@ -36,7 +36,7 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 	contxt := context.Background()
 
 	s := &Short{
-		ShortAlertID:  d.Guild + "_" + stock,
+		ShortAlertID:  stock + "_" + d.Guild,
 		ShortGuildID:  d.Guild,
 		ShortTicker:   stock,
 		ShortSPt:      spt,
