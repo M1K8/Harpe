@@ -27,6 +27,7 @@ func clearFromSyncMap(chanMap sync.Map, guildID, index string) {
 		if ok {
 			exitChan = e.(chan bool)
 			exitChan <- true
+			close(exitChan)
 			gMapCast.Delete(index)
 		}
 	}
