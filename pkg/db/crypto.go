@@ -64,10 +64,8 @@ func (d *DB) RemoveCrypto(coin string) error {
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoGuildID:  d.Guild,
-		CryptoCoin:     coin,
-		CryptoStarting: 0,
-		CryptoCallTime: time.Time{},
+		CryptoGuildID: d.Guild,
+		CryptoCoin:    coin,
 	}
 	_, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.Guild).Exec(contxt)
 
@@ -84,10 +82,8 @@ func (d *DB) GetCrypto(coin string) (*Crypto, error) {
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoGuildID:  d.Guild,
-		CryptoCoin:     coin,
-		CryptoStarting: 0,
-		CryptoCallTime: time.Time{},
+		CryptoGuildID: d.Guild,
+		CryptoCoin:    coin,
 	}
 	err := d.db.NewSelect().Model(s).Where("crypto_alert_id = ?", coin+"_"+d.Guild).Scan(contxt)
 

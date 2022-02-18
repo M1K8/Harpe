@@ -66,10 +66,8 @@ func (d *DB) RemoveStock(stock string) error {
 	contxt := context.Background()
 
 	s := &Stock{
-		StockGuildID:  d.Guild,
-		StockTicker:   stock,
-		StockStarting: 0,
-		StockCallTime: time.Time{},
+		StockGuildID: d.Guild,
+		StockTicker:  stock,
 	}
 	_, err := d.db.NewDelete().Model(s).Where("stock_alert_id = ?", stock+"_"+d.Guild).Exec(contxt)
 
@@ -87,10 +85,8 @@ func (d *DB) GetStock(stock string) (*Stock, error) {
 	stock = strings.ToUpper(stock)
 
 	s := &Stock{
-		StockGuildID:  d.Guild,
-		StockTicker:   stock,
-		StockStarting: 0,
-		StockCallTime: time.Time{},
+		StockGuildID: d.Guild,
+		StockTicker:  stock,
 	}
 	err := d.db.NewSelect().Model(s).Where("stock_alert_id = ?", stock+"_"+d.Guild).Scan(contxt)
 

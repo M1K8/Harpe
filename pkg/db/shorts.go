@@ -67,10 +67,8 @@ func (d *DB) RemoveShort(stock string) error {
 	contxt := context.Background()
 
 	s := &Short{
-		ShortGuildID:  d.Guild,
-		ShortTicker:   stock,
-		ShortStarting: 0,
-		ShortCallTime: time.Time{},
+		ShortGuildID: d.Guild,
+		ShortTicker:  stock,
 	}
 	_, err := d.db.NewDelete().Model(s).Where("short_alert_id = ?", stock+"_"+d.Guild).Exec(contxt)
 
@@ -87,10 +85,8 @@ func (d *DB) GetShort(stock string) (*Short, error) {
 	contxt := context.Background()
 	stock = strings.ToUpper(stock)
 	s := &Short{
-		ShortGuildID:  d.Guild,
-		ShortTicker:   stock,
-		ShortStarting: 0,
-		ShortCallTime: time.Time{},
+		ShortGuildID: d.Guild,
+		ShortTicker:  stock,
 	}
 	err := d.db.NewSelect().Model(s).Where("short_alert_id = ?", stock+"_"+d.Guild).Scan(contxt)
 

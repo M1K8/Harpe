@@ -58,11 +58,12 @@ type ServerConfig struct {
 	AlertRole        string        `json:"alert_role"`
 }
 type ChannelConfig struct {
-	Day       string `json:"day_trades"`
-	Swing     string `json:"swings"`
-	Watchlist string `json:"watchlist"`
-	Alerts    string `json:"alerts"`
-	EOD       string `json:"eod"`
+	Day        string `json:"day_trades"`
+	Swing      string `json:"swings"`
+	Watchlist  string `json:"watchlist"`
+	DayAlerts  string `json:"day_alerts"`
+	LongAlerts string `json:"long_alerts"`
+	EOD        string `json:"eod"`
 }
 
 type PGConfig struct {

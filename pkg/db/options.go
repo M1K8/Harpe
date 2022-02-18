@@ -99,10 +99,8 @@ func (d *DB) RemoveOption(oID, contractType, day, month, year string, price floa
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID:  d.Guild,
-		OptionUid:      oID,
-		OptionStarting: 0,
-		OptionCallTime: time.Time{},
+		OptionGuildID: d.Guild,
+		OptionUid:     oID,
 	}
 	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Exec(contxt)
 
@@ -118,10 +116,8 @@ func (d *DB) RemoveOptionByCode(oID string) error {
 	contxt := context.Background()
 
 	s := &Option{
-		OptionGuildID:  d.Guild,
-		OptionUid:      oID,
-		OptionStarting: 0,
-		OptionCallTime: time.Time{},
+		OptionGuildID: d.Guild,
+		OptionUid:     oID,
 	}
 	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Exec(contxt)
 
