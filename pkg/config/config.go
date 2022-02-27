@@ -64,6 +64,7 @@ type ChannelConfig struct {
 	DayAlerts  string `json:"day_alerts"`
 	LongAlerts string `json:"long_alerts"`
 	EOD        string `json:"eod"`
+	Premium    string `json:"premium"`
 }
 
 type PGConfig struct {
