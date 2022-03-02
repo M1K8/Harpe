@@ -171,6 +171,52 @@ func (d *DB) RmAll() error {
 	return nil
 }
 
+func (d *DB) RmOpts() error {
+	contxt := context.Background()
+
+	allOptions := make([]*Option, 0)
+	log.Println("Nuke called!!!!!!!!!!!!!!!!!!!!!!")
+
+	err := d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Scan(contxt, &allOptions)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allOptions {
+		log.Println("removing " + v.OptionUid)
+		d.RemoveOptionByCode(v.OptionUid)
+	}
+
+	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
+
+	return nil
+}
+func (d *DB) RmStocks() error {
+	contxt := context.Background()
+
+	allStocks := make([]*Stock, 0)
+
+	log.Println("Nuke called!!!!!!!!!!!!!!!!!!!!!!")
+
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.Guild).Scan(contxt, &allStocks)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allStocks {
+		log.Println("removing " + v.StockTicker)
+		d.RemoveStock(v.StockTicker)
+	}
+
+	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
+
+	return nil
+}
+
 func (d *DB) GetAll() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	contxt := context.Background()
 	allStocks := make([]*Stock, 0)
