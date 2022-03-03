@@ -148,6 +148,27 @@ func (d *DB) CryptoSetNewHigh(coin string, price float32) error {
 	return nil
 }
 
+func (d *DB) CryptoSetNewAvg(coin string, price float32) error {
+	contxt := context.Background()
+
+	s, err := d.GetCrypto(coin)
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get Crypto %v : %v", coin, err.Error()))
+		return err
+	}
+
+	s.CryptoStarting = price
+
+	_, err = d.db.NewInsert().Model(s).On("CONFLICT (crypto_alert_id) DO UPDATE").Exec(contxt)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to update Crypto %v : %v", coin, err.Error()))
+		return err
+	}
+
+	return nil
+}
+
 func (c Crypto) GetPctGain(highest float32) float32 {
 	return ((highest - c.CryptoStarting) / c.CryptoStarting) * 100
 }

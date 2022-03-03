@@ -190,6 +190,27 @@ func (d *DB) OptionSetNewHigh(uid string, price float32) error {
 	return nil
 }
 
+func (d *DB) OptionSetNewAvg(uid string, price float32) error {
+	contxt := context.Background()
+
+	s, err := d.GetOption(uid)
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get Option %v : %v", uid, err.Error()))
+		return err
+	}
+
+	s.OptionStarting = price
+
+	_, err = d.db.NewInsert().Model(s).On("CONFLICT (option_alert_id) DO UPDATE").Exec(contxt)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to update Option %v : %v", uid, err.Error()))
+		return err
+	}
+
+	return nil
+}
+
 func (o Option) GetPctGain(highest float32) float32 {
 	return ((highest - o.OptionStarting) / o.OptionStarting) * 100
 }

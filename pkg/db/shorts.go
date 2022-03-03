@@ -150,6 +150,27 @@ func (d *DB) ShortSetNewHigh(uid string, price float32) error {
 	return nil
 }
 
+func (d *DB) ShortSetNewAvg(uid string, price float32) error {
+	contxt := context.Background()
+
+	s, err := d.GetShort(uid)
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get short %v : %v", uid, err.Error()))
+		return err
+	}
+
+	s.ShortStarting = price
+
+	_, err = d.db.NewInsert().Model(s).On("CONFLICT (short_alert_id) DO UPDATE").Exec(contxt)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to update short %v : %v", uid, err.Error()))
+		return err
+	}
+
+	return nil
+}
+
 func (s Short) GetPctGain(highest float32) float32 {
 	return ((highest - s.ShortStarting) / s.ShortStarting) * 100
 }

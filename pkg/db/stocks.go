@@ -150,6 +150,27 @@ func (d *DB) StockSetNewHigh(uid string, price float32) error {
 	return nil
 }
 
+func (d *DB) StockSetNewAvg(uid string, price float32) error {
+	contxt := context.Background()
+
+	s, err := d.GetStock(uid)
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get Stock %v : %v", uid, err.Error()))
+		return err
+	}
+
+	s.StockStarting = price
+
+	_, err = d.db.NewInsert().Model(s).On("CONFLICT (stock_alert_id) DO UPDATE").Exec(contxt)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to update stock %v : %v", uid, err.Error()))
+		return err
+	}
+
+	return nil
+}
+
 func (s Stock) GetPctGain(highest float32) float32 {
 	return ((highest - s.StockStarting) / s.StockStarting) * 100
 }
