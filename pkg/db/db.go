@@ -171,6 +171,130 @@ func (d *DB) RmAll() error {
 	return nil
 }
 
+func (d *DB) RmAllDay() error {
+	contxt := context.Background()
+
+	allStocks := make([]*Stock, 0)
+	allShorts := make([]*Short, 0)
+	allOptions := make([]*Option, 0)
+	allCrypto := make([]*Crypto, 0)
+	log.Println("Nuke called!!!!!!!!!!!!!!!!!!!!!!")
+
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allStocks)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allStocks {
+		log.Println("removing " + v.StockTicker)
+		d.RemoveStock(v.StockTicker)
+	}
+
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allShorts)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allShorts {
+		log.Println("removing " + v.ShortTicker)
+		d.RemoveShort(v.ShortTicker)
+	}
+
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allCrypto)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allCrypto {
+		log.Println("removing " + v.CryptoCoin)
+		d.RemoveCrypto(v.CryptoCoin)
+	}
+
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allOptions)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allOptions {
+		log.Println("removing " + v.OptionUid)
+		d.RemoveOptionByCode(v.OptionUid)
+	}
+
+	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
+
+	return nil
+}
+
+func (d *DB) RmAllLong() error {
+	contxt := context.Background()
+
+	allStocks := make([]*Stock, 0)
+	allShorts := make([]*Short, 0)
+	allOptions := make([]*Option, 0)
+	allCrypto := make([]*Crypto, 0)
+	log.Println("Nuke called!!!!!!!!!!!!!!!!!!!!!!")
+
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allStocks)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allStocks {
+		log.Println("removing " + v.StockTicker)
+		d.RemoveStock(v.StockTicker)
+	}
+
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allShorts)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allShorts {
+		log.Println("removing " + v.ShortTicker)
+		d.RemoveShort(v.ShortTicker)
+	}
+
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allCrypto)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allCrypto {
+		log.Println("removing " + v.CryptoCoin)
+		d.RemoveCrypto(v.CryptoCoin)
+	}
+
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allOptions)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
+		return err
+	}
+
+	for _, v := range allOptions {
+		log.Println("removing " + v.OptionUid)
+		d.RemoveOptionByCode(v.OptionUid)
+	}
+
+	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
+
+	return nil
+}
+
 func (d *DB) RmOpts() error {
 	contxt := context.Background()
 
