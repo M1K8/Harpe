@@ -46,6 +46,7 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 		ShortPoI:          poi,
 		ShortStop:         stop,
 		ShortTrailingStop: tstop,
+		ShortLastLow:      starting,
 		ChannelType:       channelType,
 		ShortCallTime:     time.Now(),
 		ShortPOIHit:       false,

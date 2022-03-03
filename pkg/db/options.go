@@ -58,6 +58,7 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 		ChannelType:              channelType,
 		OptionCallTime:           time.Now(),
 		OptionHighest:            starting,
+		OptionLastHigh:           starting,
 		OptionTrailingStop:       tstop,
 		OptionUnderlyingPoI:      poi,
 		OptionUnderlyingStop:     stop,

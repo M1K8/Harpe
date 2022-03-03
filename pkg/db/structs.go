@@ -34,6 +34,7 @@ type Stock struct {
 	StockSPt          float32
 	StockExpiry       int64
 	StockHighest      float32
+	StockLastHigh     float32
 	StockPoI          float32
 	StockStop         float32
 	StockTrailingStop float32
@@ -52,6 +53,7 @@ type Short struct {
 	ShortEPt          float32
 	ShortExpiry       int64
 	ShortLowest       float32
+	ShortLastLow      float32
 	ShortPoI          float32
 	ShortStop         float32
 	ShortTrailingStop float32
@@ -73,6 +75,7 @@ type Option struct {
 	OptionStrike             float32
 	OptionStarting           float32
 	OptionHighest            float32
+	OptionLastHigh           float32
 	OptionTrailingStop       float32
 	OptionUnderlyingPoI      float32
 	OptionUnderlyingStop     float32
@@ -92,6 +95,7 @@ type Crypto struct {
 	CryptoEPt          float32
 	CryptoExpiry       int64
 	CryptoHighest      float32
+	CryptoLastHigh     float32
 	CryptoStop         float32
 	CryptoTrailingStop float32
 	CryptoPoI          float32

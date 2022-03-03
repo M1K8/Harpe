@@ -43,6 +43,7 @@ func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, s
 		StockExpiry:       expiry,
 		StockStarting:     starting,
 		StockStop:         stop,
+		StockLastHigh:     starting,
 		StockPoI:          poi,
 		StockTrailingStop: tstop,
 		ChannelType:       channelType,

@@ -39,6 +39,7 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop, tstop float3
 		CryptoCoin:         coin,
 		CryptoStarting:     starting,
 		CryptoHighest:      starting,
+		CryptoLastHigh:     starting,
 		ChannelType:        channelType,
 		CryptoCallTime:     time.Now(),
 		CryptoEPt:          ept,
