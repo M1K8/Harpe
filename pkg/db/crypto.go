@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, channelType int, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop, tstop float32, channelType int, starting float32) (chan bool, bool, error) {
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists("c_" + coin)
 
@@ -34,19 +34,20 @@ func (d *DB) CreateCrypto(coin, author string, spt, ept, poi, stop float32, chan
 	contxt := context.Background()
 
 	s := &Crypto{
-		CryptoAlertID:  coin + "_" + d.Guild,
-		CryptoGuildID:  d.Guild,
-		CryptoCoin:     coin,
-		CryptoStarting: starting,
-		CryptoHighest:  starting,
-		ChannelType:    channelType,
-		CryptoCallTime: time.Now(),
-		CryptoEPt:      ept,
-		CryptoSPt:      spt,
-		CryptoStop:     stop,
-		CryptoPoI:      poi,
-		CryptoPOIHit:   false,
-		Caller:         author,
+		CryptoAlertID:      coin + "_" + d.Guild,
+		CryptoGuildID:      d.Guild,
+		CryptoCoin:         coin,
+		CryptoStarting:     starting,
+		CryptoHighest:      starting,
+		ChannelType:        channelType,
+		CryptoCallTime:     time.Now(),
+		CryptoEPt:          ept,
+		CryptoSPt:          spt,
+		CryptoStop:         stop,
+		CryptoTrailingStop: tstop,
+		CryptoPoI:          poi,
+		CryptoPOIHit:       false,
+		Caller:             author,
 	}
 
 	_, err := d.db.NewInsert().Model(s).On("CONFLICT (crypto_alert_id) DO UPDATE").Exec(contxt)

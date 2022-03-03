@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, underStart float32) (chan bool, string, bool, error) {
+func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, tstop, underStart float32) (chan bool, string, bool, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists(oID)
@@ -58,6 +58,7 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 		ChannelType:              channelType,
 		OptionCallTime:           time.Now(),
 		OptionHighest:            starting,
+		OptionTrailingStop:       tstop,
 		OptionUnderlyingPoI:      poi,
 		OptionUnderlyingStop:     stop,
 		OptionUnderlyingStarting: underStart,
@@ -86,14 +87,6 @@ func (d *DB) RemoveOption(oID, contractType, day, month, year string, price floa
 
 	if len(day) > 2 || len(day) == 0 {
 		return errors.New("invalid Syntax - day is incorrect")
-	}
-
-	if len(month) == 1 {
-		month = "0" + month
-	}
-
-	if len(day) == 1 {
-		day = "0" + day
 	}
 
 	contxt := context.Background()

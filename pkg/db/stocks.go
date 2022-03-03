@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, stop, tstop float32, expiry int64, starting float32) (chan bool, bool, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists("s_" + stock)
@@ -35,20 +35,21 @@ func (d *DB) CreateStock(stock, author string, channelType int, spt, ept, poi, s
 
 	contxt := context.Background()
 	s := &Stock{
-		StockAlertID:  stock + "_" + d.Guild,
-		StockGuildID:  d.Guild,
-		StockTicker:   stock,
-		StockEPt:      ept,
-		StockSPt:      spt,
-		StockExpiry:   expiry,
-		StockStarting: starting,
-		StockStop:     stop,
-		StockPoI:      poi,
-		ChannelType:   channelType,
-		StockCallTime: time.Now(),
-		StockPOIHit:   false,
-		StockHighest:  starting,
-		Caller:        author,
+		StockAlertID:      stock + "_" + d.Guild,
+		StockGuildID:      d.Guild,
+		StockTicker:       stock,
+		StockEPt:          ept,
+		StockSPt:          spt,
+		StockExpiry:       expiry,
+		StockStarting:     starting,
+		StockStop:         stop,
+		StockPoI:          poi,
+		StockTrailingStop: tstop,
+		ChannelType:       channelType,
+		StockCallTime:     time.Now(),
+		StockPOIHit:       false,
+		StockHighest:      starting,
+		Caller:            author,
 	}
 
 	_, err := d.db.NewInsert().Model(s).On("CONFLICT (stock_alert_id) DO UPDATE").Exec(contxt)

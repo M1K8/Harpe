@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, stop float32, expiry int64, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, stop, tstop float32, expiry int64, starting float32) (chan bool, bool, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists("sh_" + stock)
@@ -36,20 +36,21 @@ func (d *DB) CreateShort(stock, author string, channelType int, spt, ept, poi, s
 	contxt := context.Background()
 
 	s := &Short{
-		ShortAlertID:  stock + "_" + d.Guild,
-		ShortGuildID:  d.Guild,
-		ShortTicker:   stock,
-		ShortSPt:      spt,
-		ShortEPt:      ept,
-		ShortExpiry:   expiry,
-		ShortStarting: starting,
-		ShortPoI:      poi,
-		ShortStop:     stop,
-		ChannelType:   channelType,
-		ShortCallTime: time.Now(),
-		ShortPOIHit:   false,
-		ShortLowest:   starting,
-		Caller:        author,
+		ShortAlertID:      stock + "_" + d.Guild,
+		ShortGuildID:      d.Guild,
+		ShortTicker:       stock,
+		ShortSPt:          spt,
+		ShortEPt:          ept,
+		ShortExpiry:       expiry,
+		ShortStarting:     starting,
+		ShortPoI:          poi,
+		ShortStop:         stop,
+		ShortTrailingStop: tstop,
+		ChannelType:       channelType,
+		ShortCallTime:     time.Now(),
+		ShortPOIHit:       false,
+		ShortLowest:       starting,
+		Caller:            author,
 	}
 
 	_, err := d.db.NewInsert().Model(s).On("CONFLICT (short_alert_id) DO UPDATE").Exec(contxt)
