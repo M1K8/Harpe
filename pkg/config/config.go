@@ -23,6 +23,12 @@ type Config struct {
 	PostgresCfg PGConfig       `json:"pg"`
 }
 
+type AlerterChannel struct {
+	ChannelID string `json:"cid"`
+	UserID    string `json:"uid"`
+	RoleID    string `json:"uid"`
+}
+
 type DiscordConfig struct {
 	API string `json:"DISCORD_API"`
 }
@@ -58,13 +64,13 @@ type ServerConfig struct {
 	AlertRole        string        `json:"alert_role"`
 }
 type ChannelConfig struct {
-	Day        string `json:"day_trades"`
-	Swing      string `json:"swings"`
-	Watchlist  string `json:"watchlist"`
-	DayAlerts  string `json:"day_alerts"`
-	LongAlerts string `json:"long_alerts"`
-	EOD        string `json:"eod"`
-	Premium    string `json:"premium"`
+	Swing      string           `json:"swings"`
+	Watchlist  string           `json:"watchlist"`
+	DayAlerts  string           `json:"day_alerts"`
+	LongAlerts string           `json:"long_alerts"`
+	EOD        string           `json:"eod"`
+	Premium    string           `json:"premium"`
+	Alerters   []AlerterChannel `json:"alerters"`
 }
 
 type PGConfig struct {

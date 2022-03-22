@@ -59,12 +59,10 @@ func GetChannelType(guildID, channelID string) int {
 		switch channelID {
 		case s.ChannelConfig.Swing:
 			return SWING
-		case s.ChannelConfig.Day:
-			return DAY
 		case s.ChannelConfig.Watchlist:
 			return WATCHLIST
 		default:
-			return -1
+			return DAY // assume other is alerter channel - therefore day trade
 		}
 	} else {
 		return -1
