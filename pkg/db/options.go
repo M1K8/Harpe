@@ -24,10 +24,10 @@ import (
 	"time"
 )
 
-func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, tstop, underStart float32) (chan bool, string, bool, error) {
+func (d *DB) CreateOption(uid, oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, tstop, underStart float32) (chan bool, string, bool, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
-	exists, exitChan := d.GetExitChanExists(oID)
+	exists, exitChan := d.GetExitChanExists(uid)
 
 	if exists {
 		return exitChan, oID, exists, nil
@@ -45,7 +45,7 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 		return nil, "", false, errors.New("invalid Syntax - day is incorrect")
 	}
 	s := &Option{
-		OptionAlertID:            oID + "_" + d.Guild,
+		OptionAlertID:            uid,
 		OptionGuildID:            d.Guild,
 		OptionTicker:             ticker,
 		OptionUid:                oID,
@@ -70,14 +70,14 @@ func (d *DB) CreateOption(oID, author string, channelType int, ticker, contractT
 	_, err := d.db.NewInsert().Model(s).On("CONFLICT (option_alert_id) DO UPDATE").Exec(context.Background())
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to create option %v: %v.", oID, err.Error()))
+		log.Println(fmt.Sprintf("Unable to create option %v: %v.", uid, err.Error()))
 		return nil, oID, false, err
 	}
 
 	return exitChan, oID, exists, nil
 }
 
-func (d *DB) RemoveOption(oID, contractType, day, month, year string, price float32) error {
+func (d *DB) RemoveOption(uid, contractType, day, month, year string, price float32) error {
 	if len(year) != 4 {
 		return errors.New("invalid Syntax - year is incorrect")
 	}
@@ -94,66 +94,66 @@ func (d *DB) RemoveOption(oID, contractType, day, month, year string, price floa
 
 	s := &Option{
 		OptionGuildID: d.Guild,
-		OptionUid:     oID,
+		OptionAlertID: uid,
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", uid).Exec(contxt)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to delete option %v: %v.", oID, err.Error()))
+		log.Println(fmt.Sprintf("Unable to delete option %v: %v.", uid, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.Guild, oID)
+	clearFromSyncMap(chanMap, d.Guild, uid)
 	return nil
 }
 
-func (d *DB) RemoveOptionByCode(oID string) error {
+func (d *DB) RemoveOptionByCode(uid string) error {
 	contxt := context.Background()
 
 	s := &Option{
 		OptionGuildID: d.Guild,
-		OptionUid:     oID,
+		OptionAlertID: uid,
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Exec(contxt)
+	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", uid).Exec(contxt)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to remove option %v: %v.", oID, err.Error()))
+		log.Println(fmt.Sprintf("Unable to remove option %v: %v.", uid, err.Error()))
 		return err
 	}
-	clearFromSyncMap(chanMap, d.Guild, oID)
+	clearFromSyncMap(chanMap, d.Guild, uid)
 	return nil
 }
 
-func (d *DB) GetOption(oID string) (*Option, error) {
+func (d *DB) GetOption(uid string) (*Option, error) {
 
 	contxt := context.Background()
 
 	s := &Option{
 		OptionGuildID: d.Guild,
-		OptionUid:     oID,
+		OptionAlertID: uid,
 	}
-	err := d.db.NewSelect().Model(s).Where("option_alert_id = ?", oID+"_"+d.Guild).Scan(contxt)
+	err := d.db.NewSelect().Model(s).Where("option_alert_id = ?", uid).Scan(contxt)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to get option %v: %v.", oID, err.Error()))
+		log.Println(fmt.Sprintf("Unable to get option %v: %v.", uid, err.Error()))
 		return nil, err
 	}
 	gMap, ok := chanMap.Load(d.Guild)
 	if ok {
 		gMapCast := gMap.(*sync.Map)
-		_, ok := gMapCast.Load(oID)
+		_, ok := gMapCast.Load(uid)
 		if !ok {
-			log.Println(fmt.Sprintf("Unable to get alert channel for option %v. Please try recreating this alert, or calling !refresh then running this command again.", oID))
+			log.Println(fmt.Sprintf("Unable to get alert channel for option %v. Please try recreating this alert, or calling !refresh then running this command again.", uid))
 			return nil, err
 		}
 	}
 	return s, nil
 }
 
-func (d *DB) OptionPOIHit(oID string) error {
+func (d *DB) OptionPOIHit(uid string) error {
 	contxt := context.Background()
-	s, err := d.GetOption(oID)
+	s, err := d.GetOption(uid)
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to get option %v : %v", oID, err.Error()))
+		log.Println(fmt.Sprintf("Unable to get option %v : %v", uid, err.Error()))
 		return err
 	}
 
@@ -162,7 +162,7 @@ func (d *DB) OptionPOIHit(oID string) error {
 	_, err = d.db.NewInsert().Model(s).On("CONFLICT (option_alert_id) DO UPDATE").Exec(contxt)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to update option %v : %v", oID, err.Error()))
+		log.Println(fmt.Sprintf("Unable to update option %v : %v", uid, err.Error()))
 		return err
 	}
 
