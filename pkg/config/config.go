@@ -26,7 +26,7 @@ type Config struct {
 type AlerterChannel struct {
 	ChannelID string `json:"cid"`
 	UserID    string `json:"uid"`
-	RoleID    string `json:"uid"`
+	RoleID    string `json:"rid"`
 }
 
 type DiscordConfig struct {
