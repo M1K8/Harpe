@@ -126,8 +126,8 @@ func (d *DB) RmAll() error {
 	}
 
 	for _, v := range allStocks {
-		log.Println("removing " + v.StockTicker)
-		d.RemoveStock(v.StockTicker)
+		log.Println("removing " + v.StockAlertID)
+		d.RemoveStock(v.StockAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Scan(contxt, &allShorts)
@@ -138,8 +138,8 @@ func (d *DB) RmAll() error {
 	}
 
 	for _, v := range allShorts {
-		log.Println("removing " + v.ShortTicker)
-		d.RemoveShort(v.ShortTicker)
+		log.Println("removing " + v.ShortAlertID)
+		d.RemoveShort(v.ShortAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Scan(contxt, &allCrypto)
@@ -188,8 +188,8 @@ func (d *DB) RmAllDay() error {
 	}
 
 	for _, v := range allStocks {
-		log.Println("removing " + v.StockTicker)
-		d.RemoveStock(v.StockTicker)
+		log.Println("removing " + v.StockAlertID)
+		d.RemoveStock(v.StockAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allShorts)
@@ -200,8 +200,8 @@ func (d *DB) RmAllDay() error {
 	}
 
 	for _, v := range allShorts {
-		log.Println("removing " + v.ShortTicker)
-		d.RemoveShort(v.ShortTicker)
+		log.Println("removing " + v.ShortAlertID)
+		d.RemoveShort(v.ShortAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allCrypto)
@@ -250,8 +250,8 @@ func (d *DB) RmAllLong() error {
 	}
 
 	for _, v := range allStocks {
-		log.Println("removing " + v.StockTicker)
-		d.RemoveStock(v.StockTicker)
+		log.Println("removing " + v.StockAlertID)
+		d.RemoveStock(v.StockAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allShorts)
@@ -262,8 +262,8 @@ func (d *DB) RmAllLong() error {
 	}
 
 	for _, v := range allShorts {
-		log.Println("removing " + v.ShortTicker)
-		d.RemoveShort(v.ShortTicker)
+		log.Println("removing " + v.ShortAlertID)
+		d.RemoveShort(v.ShortAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allCrypto)
@@ -332,8 +332,8 @@ func (d *DB) RmStocks() error {
 	}
 
 	for _, v := range allStocks {
-		log.Println("removing " + v.StockTicker)
-		d.RemoveStock(v.StockTicker)
+		log.Println("removing " + v.StockAlertID)
+		d.RemoveStock(v.StockAlertID)
 	}
 
 	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
@@ -459,12 +459,12 @@ func (d *DB) RefreshFromDB() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 
 func SplitOptionsCode(code string) (string, string, string, string, string, float32, error) {
 	var (
-		ticker string
-		day    string
-		month  string
-		year   string
-		cType  string
-		price  float32
+		AlertID string
+		day     string
+		month   string
+		year    string
+		cType   string
+		price   float32
 	)
 
 	indexOffset := 0
@@ -482,7 +482,7 @@ func SplitOptionsCode(code string) (string, string, string, string, string, floa
 		return "", "", "", "", "", -1, errors.New("invalid code - " + code)
 	}
 
-	ticker = code[:indexOffset+1] // 3
+	AlertID = code[:indexOffset+1] // 3
 	year = "20" + code[indexOffset+1:indexOffset+3]
 	month = code[indexOffset+3 : indexOffset+5]
 	day = code[indexOffset+5 : indexOffset+7]
@@ -495,7 +495,7 @@ func SplitOptionsCode(code string) (string, string, string, string, string, floa
 
 	price = float32(p / 1000)
 
-	return ticker, cType, day, month, year, price, nil
+	return AlertID, cType, day, month, year, price, nil
 }
 
 func IsTradingHours() bool {
