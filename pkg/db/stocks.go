@@ -17,6 +17,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -138,7 +139,18 @@ func (d *DB) StockSetNewHigh(uid string, price float32) error {
 
 	s.StockHighest = price
 
-	_, err = d.db.NewInsert().Model(s).On("CONFLICT (stock_alert_id) DO UPDATE").Exec(contxt)
+	res, err := d.db.NewInsert().Model(s).On("CONFLICT (stock_alert_id) DO UPDATE").Exec(contxt)
+	rowsAffected, _ := res.RowsAffected()
+
+	if rowsAffected == 0 {
+		err = errors.New(fmt.Sprintf("Unable to remove Stock %v : NOT FOUND", uid))
+		return err
+	}
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to remove Stock %v : %v", uid, err.Error()))
+		return err
+	}
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to update stock %v : %v", uid, err.Error()))

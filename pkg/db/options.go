@@ -96,10 +96,17 @@ func (d *DB) RemoveOption(uid, contractType, day, month, year string, price floa
 		OptionGuildID: d.Guild,
 		OptionAlertID: uid,
 	}
-	_, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", uid).Exec(contxt)
+	res, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", uid).Exec(contxt)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	if rowsAffected == 0 {
+		err = errors.New(fmt.Sprintf("Unable to remove Option %v : NOT FOUND", uid))
+		return err
+	}
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Unable to delete option %v: %v.", uid, err.Error()))
+		log.Println(fmt.Sprintf("Unable to remove Option %v : %v", uid, err.Error()))
 		return err
 	}
 	clearFromSyncMap(chanMap, d.Guild, uid)

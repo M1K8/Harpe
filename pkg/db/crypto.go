@@ -17,6 +17,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -69,7 +70,13 @@ func (d *DB) RemoveCrypto(uid string) error {
 		CryptoGuildID: d.Guild,
 		CryptoAlertID: uid,
 	}
-	_, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", uid).Exec(contxt)
+	res, err := d.db.NewDelete().Model(s).Where("crypto_alert_id = ?", uid).Exec(contxt)
+	rowsAffected, _ := res.RowsAffected()
+
+	if rowsAffected == 0 {
+		err = errors.New(fmt.Sprintf("Unable to remove Crypto %v : NOT FOUND", uid))
+		return err
+	}
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to remove Crypto %v : %v", uid, err.Error()))
