@@ -150,8 +150,8 @@ func (d *DB) RmAll() error {
 	}
 
 	for _, v := range allCrypto {
-		log.Println("removing " + v.CryptoCoin)
-		d.RemoveCrypto(v.CryptoCoin)
+		log.Println("removing " + v.CryptoAlertID)
+		d.RemoveCrypto(v.CryptoAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Scan(contxt, &allOptions)
@@ -162,8 +162,8 @@ func (d *DB) RmAll() error {
 	}
 
 	for _, v := range allOptions {
-		log.Println("removing " + v.OptionUid)
-		d.RemoveOptionByCode(v.OptionUid)
+		log.Println("removing " + v.OptionAlertID)
+		d.RemoveOptionByCode(v.OptionAlertID)
 	}
 
 	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
@@ -212,8 +212,8 @@ func (d *DB) RmAllDay() error {
 	}
 
 	for _, v := range allCrypto {
-		log.Println("removing " + v.CryptoCoin)
-		d.RemoveCrypto(v.CryptoCoin)
+		log.Println("removing " + v.CryptoAlertID)
+		d.RemoveCrypto(v.CryptoAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Where("channel_type = ?", 1).Scan(contxt, &allOptions)
@@ -224,8 +224,8 @@ func (d *DB) RmAllDay() error {
 	}
 
 	for _, v := range allOptions {
-		log.Println("removing " + v.OptionUid)
-		d.RemoveOptionByCode(v.OptionUid)
+		log.Println("removing " + v.OptionAlertID)
+		d.RemoveOptionByCode(v.OptionAlertID)
 	}
 
 	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
@@ -274,8 +274,8 @@ func (d *DB) RmAllLong() error {
 	}
 
 	for _, v := range allCrypto {
-		log.Println("removing " + v.CryptoCoin)
-		d.RemoveCrypto(v.CryptoCoin)
+		log.Println("removing " + v.CryptoAlertID)
+		d.RemoveCrypto(v.CryptoAlertID)
 	}
 
 	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Where("channel_type = ?", 0).Scan(contxt, &allOptions)
@@ -286,8 +286,8 @@ func (d *DB) RmAllLong() error {
 	}
 
 	for _, v := range allOptions {
-		log.Println("removing " + v.OptionUid)
-		d.RemoveOptionByCode(v.OptionUid)
+		log.Println("removing " + v.OptionAlertID)
+		d.RemoveOptionByCode(v.OptionAlertID)
 	}
 
 	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
@@ -309,8 +309,8 @@ func (d *DB) RmOpts() error {
 	}
 
 	for _, v := range allOptions {
-		log.Println("removing " + v.OptionUid)
-		d.RemoveOptionByCode(v.OptionUid)
+		log.Println("removing " + v.OptionAlertID)
+		d.RemoveOptionByCode(v.OptionAlertID)
 	}
 
 	log.Println("Nuke completed!!!!!!!!!!!!!!!!!!!!!!")
@@ -377,7 +377,6 @@ func (d *DB) GetAll() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	}
 
 	return allStocks, allShorts, allCrypto, allOptions, nil
-
 }
 
 func (d *DB) GetExitChan(index string) chan bool {
