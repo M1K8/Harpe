@@ -271,6 +271,44 @@ func (d *DB) GetAll() ([]*Stock, []*Short, []*Crypto, []*Option, error) {
 	return allStocks, allShorts, allCrypto, allOptions, nil
 }
 
+func (d *DB) GetAllCaller(caller string) ([]*Stock, []*Short, []*Crypto, []*Option, error) {
+	contxt := context.Background()
+	allStocks := make([]*Stock, 0)
+	allShorts := make([]*Short, 0)
+	allOptions := make([]*Option, 0)
+	allCrypto := make([]*Crypto, 0)
+
+	err := d.db.NewSelect().Model((*Stock)(nil)).Where("stock_guild_id = ?", d.Guild).Where("caller = ?", caller).Scan(contxt, &allStocks)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get stocks. There is probably a serious issue: %v.", err.Error()))
+		return nil, nil, nil, nil, err
+	}
+
+	err = d.db.NewSelect().Model((*Short)(nil)).Where("short_guild_id = ?", d.Guild).Where("caller = ?", caller).Scan(contxt, &allShorts)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get shorts. There is probably a serious issue: %v.", err.Error()))
+		return nil, nil, nil, nil, err
+	}
+
+	err = d.db.NewSelect().Model((*Crypto)(nil)).Where("crypto_guild_id = ?", d.Guild).Where("caller = ?", caller).Scan(contxt, &allCrypto)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get crypto. There is probably a serious issue: %v.", err.Error()))
+		return nil, nil, nil, nil, err
+	}
+
+	err = d.db.NewSelect().Model((*Option)(nil)).Where("option_guild_id = ?", d.Guild).Where("caller = ?", caller).Scan(contxt, &allOptions)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get options. There is probably a serious issue: %v.", err.Error()))
+		return nil, nil, nil, nil, err
+	}
+
+	return allStocks, allShorts, allCrypto, allOptions, nil
+}
+
 func (d *DB) GetExitChan(index string) chan bool {
 	val, _ := chanMap.Load(d.Guild)
 
