@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 M1K
+ * Copyright 2022 M1K
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,13 +64,8 @@ type ServerConfig struct {
 	AlertRole        string        `json:"alert_role"`
 }
 type ChannelConfig struct {
-	Swing     string           `json:"swings"`
-	Day       string           `json:"day"`
-	Watchlist string           `json:"watchlist"`
-	Alerts    string           `json:"alerts"`
-	EOD       string           `json:"eod"`
-	Premium   string           `json:"premium"`
-	Alerters  []AlerterChannel `json:"alerters"`
+	EOD      string           `json:"eod"`
+	Alerters []AlerterChannel `json:"alerters"`
 }
 
 type PGConfig struct {

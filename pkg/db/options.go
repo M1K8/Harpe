@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 M1K
+ * Copyright 2022 M1K
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateOption(uid, oID, author string, channelType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, tstop, underStart float32) (chan bool, string, bool, error) {
+func (d *DB) CreateOption(uid, oID, author string, alertType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, tstop, underStart float32) (chan bool, string, bool, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists(uid)
@@ -55,7 +55,7 @@ func (d *DB) CreateOption(uid, oID, author string, channelType int, ticker, cont
 		OptionYear:               year,
 		OptionStrike:             price,
 		OptionStarting:           starting,
-		ChannelType:              channelType,
+		AlertType:                alertType,
 		OptionCallTime:           time.Now(),
 		OptionHighest:            starting,
 		OptionLastHigh:           starting,
@@ -75,42 +75,6 @@ func (d *DB) CreateOption(uid, oID, author string, channelType int, ticker, cont
 	}
 
 	return exitChan, oID, exists, nil
-}
-
-func (d *DB) RemoveOption(uid, contractType, day, month, year string, price float32) error {
-	if len(year) != 4 {
-		return errors.New("invalid Syntax - year is incorrect")
-	}
-
-	if len(month) > 2 || len(month) == 0 {
-		return errors.New("invalid Syntax - month is incorrect")
-	}
-
-	if len(day) > 2 || len(day) == 0 {
-		return errors.New("invalid Syntax - day is incorrect")
-	}
-
-	contxt := context.Background()
-
-	s := &Option{
-		OptionGuildID: d.Guild,
-		OptionAlertID: uid,
-	}
-	res, err := d.db.NewDelete().Model(s).Where("option_alert_id = ?", uid).Exec(contxt)
-
-	rowsAffected, _ := res.RowsAffected()
-
-	if rowsAffected == 0 {
-		err = errors.New(fmt.Sprintf("Unable to remove Option %v : NOT FOUND", uid))
-		return err
-	}
-
-	if err != nil {
-		log.Println(fmt.Sprintf("Unable to remove Option %v : %v", uid, err.Error()))
-		return err
-	}
-	clearFromSyncMap(chanMap, d.Guild, uid)
-	return nil
 }
 
 func (d *DB) RemoveOptionByCode(uid string) error {

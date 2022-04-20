@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 M1K
+ * Copyright 2022 M1K
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 package utils
 
 const (
-	SWING     = 0
-	DAY       = 1
-	WATCHLIST = 2
-	ALERTS    = 3
+	SWING = 0
+	DAY   = 1
 )

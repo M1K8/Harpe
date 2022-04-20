@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 M1K
+ * Copyright 2022 M1K
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ type Stock struct {
 	StockPoI          float32
 	StockStop         float32
 	StockTrailingStop float32
-	ChannelType       int
+	AlertType         int
 	Caller            string
 	StockPOIHit       bool
 	StockCallTime     time.Time
@@ -57,7 +57,7 @@ type Short struct {
 	ShortPoI          float32
 	ShortStop         float32
 	ShortTrailingStop float32
-	ChannelType       int
+	AlertType         int
 	Caller            string
 	ShortPOIHit       bool
 	ShortCallTime     time.Time
@@ -80,7 +80,7 @@ type Option struct {
 	OptionUnderlyingPoI      float32
 	OptionUnderlyingStop     float32
 	OptionUnderlyingStarting float32
-	ChannelType              int
+	AlertType                int
 	Caller                   string
 	OptionUnderlyingPOIHit   bool
 	OptionCallTime           time.Time
@@ -99,7 +99,7 @@ type Crypto struct {
 	CryptoStop         float32
 	CryptoTrailingStop float32
 	CryptoPoI          float32
-	ChannelType        int
+	AlertType          int
 	Caller             string
 	CryptoPOIHit       bool
 	CryptoCallTime     time.Time

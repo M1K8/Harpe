@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 M1K
+ * Copyright 2022 M1K
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateStock(uid, stock, author string, channelType int, spt, ept, poi, stop, tstop float32, expiry int64, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateStock(uid, stock, author string, alertType int, spt, ept, poi, stop, tstop float32, expiry int64, starting float32) (chan bool, bool, error) {
 
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists(uid)
@@ -46,7 +46,7 @@ func (d *DB) CreateStock(uid, stock, author string, channelType int, spt, ept, p
 		StockLastHigh:     starting,
 		StockPoI:          poi,
 		StockTrailingStop: tstop,
-		ChannelType:       channelType,
+		AlertType:         alertType,
 		StockCallTime:     time.Now(),
 		StockPOIHit:       false,
 		StockHighest:      starting,

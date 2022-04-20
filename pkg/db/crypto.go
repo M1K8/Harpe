@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 M1K
+ * Copyright 2022 M1K
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-func (d *DB) CreateCrypto(uid, coin, author string, spt, ept, poi, stop, tstop float32, channelType int, starting float32) (chan bool, bool, error) {
+func (d *DB) CreateCrypto(uid, coin, author string, spt, ept, poi, stop, tstop float32, alertType int, starting float32) (chan bool, bool, error) {
 	chanMap.LoadOrStore(d.Guild, &sync.Map{})
 	exists, exitChan := d.GetExitChanExists(uid)
 
@@ -41,7 +41,7 @@ func (d *DB) CreateCrypto(uid, coin, author string, spt, ept, poi, stop, tstop f
 		CryptoStarting:     starting,
 		CryptoHighest:      starting,
 		CryptoLastHigh:     starting,
-		ChannelType:        channelType,
+		AlertType:          alertType,
 		CryptoCallTime:     time.Now(),
 		CryptoEPt:          ept,
 		CryptoSPt:          spt,
