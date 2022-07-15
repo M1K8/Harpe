@@ -22,6 +22,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"github.com/m1k8/harpe/pkg/utils"
 )
 
 func (d *DB) CreateOption(uid, oID, author string, alertType int, ticker, contractType, day, month, year string, price, starting, pt, poi, stop, tstop, underStart float32) (chan bool, string, bool, error) {
@@ -94,6 +96,35 @@ func (d *DB) RemoveOptionByCode(uid string) error {
 	return nil
 }
 
+func (d *DB) SwitchOptionsTypeByCode(uid string) (string, error) {
+	contxt := context.Background()
+	retStr := ""
+
+	s, err := d.GetOption(uid)
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to get Option %v : %v", uid, err.Error()))
+		return "", err
+	}
+
+	old := s.AlertType
+
+	if old == utils.DAY {
+		s.AlertType = utils.SWING
+		retStr = "Swing"
+	} else {
+		s.AlertType = utils.DAY
+		retStr = "Day"
+	}
+	_, err = d.db.NewInsert().Model(s).On("CONFLICT (option_alert_id) DO UPDATE").Exec(contxt)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Unable to update Option %v : %v", uid, err.Error()))
+		return "", err
+	}
+
+	return retStr, nil
+}
+
 func (d *DB) GetOption(uid string) (*Option, error) {
 
 	contxt := context.Background()
@@ -113,7 +144,7 @@ func (d *DB) GetOption(uid string) (*Option, error) {
 		gMapCast := gMap.(*sync.Map)
 		_, ok := gMapCast.Load(uid)
 		if !ok {
-			log.Println(fmt.Sprintf("Unable to get alert channel for option %v. Please try recreating this alert, or calling !refresh then running this command again.", uid))
+			err = errors.New(fmt.Sprintf("Unable to get alert channel for option %v. Please try recreating this alert, or calling !refresh then running this command again.", uid))
 			return nil, err
 		}
 	}
