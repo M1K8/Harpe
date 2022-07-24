@@ -71,10 +71,17 @@ func NewDB(guildID string) *DB {
 			pgdriver.WithPassword(pw)))
 
 		db := bun.NewDB(sqldb, pgdialect.New())
+		db.RegisterModel((*Channel)(nil))
+		//////////////////////////////////////////////////
 		db.RegisterModel((*Stock)(nil))
 		db.RegisterModel((*Short)(nil))
 		db.RegisterModel((*Option)(nil))
 		db.RegisterModel((*Crypto)(nil))
+
+		_, err = db.NewCreateTable().Model((*Channel)(nil)).IfNotExists().Exec(contxt)
+		if err != nil {
+			panic("unable to create/get channel perms table: " + err.Error())
+		}
 
 		_, err = db.NewCreateTable().Model((*Stock)(nil)).IfNotExists().Exec(contxt)
 		if err != nil {

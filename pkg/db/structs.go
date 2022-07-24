@@ -25,6 +25,13 @@ type Alert interface {
 	GetPctGain(closing float32) float32
 }
 
+type Channel struct {
+	UserID    string `bun:",pk"`
+	RoleID    string
+	GuildID   string
+	ChannelID string
+}
+
 type Stock struct {
 	StockAlertID      string `bun:",pk"`
 	StockGuildID      string

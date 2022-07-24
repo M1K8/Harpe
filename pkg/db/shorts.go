@@ -79,12 +79,6 @@ func (d *DB) RemoveShort(uid string) error {
 		err = errors.New(fmt.Sprintf("Unable to remove Short %v : NOT FOUND", uid))
 		return err
 	}
-
-	if err != nil {
-		log.Println(fmt.Sprintf("Unable to remove Short %v : %v", uid, err.Error()))
-		return err
-	}
-
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to delete short %v : %v", uid, err.Error()))
 		return err
