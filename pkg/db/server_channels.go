@@ -47,6 +47,16 @@ func (d *DB) InitialiseServer(guildID, permID string) error {
 	return nil
 }
 
+func (d *DB) GetServerPerm(guildID string) (string, error) {
+	res, err := d.GetAlerter(guildID, "0")
+
+	if err != nil {
+		return "", err
+	}
+
+	return res.PermissionsID, nil
+}
+
 func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID string) error {
 	contxt := context.Background()
 
@@ -126,6 +136,10 @@ func (d *DB) GetAllAlerters(guild string) ([]*Channel, error) {
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get alerters %v : %v", guild, err.Error()))
 		return nil, err
+	}
+
+	if len(allAlerters) == 0 {
+		return nil, fmt.Errorf("no alerters found for %v", guild)
 	}
 	return allAlerters, nil
 }
