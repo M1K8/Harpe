@@ -7,17 +7,58 @@ import (
 	"log"
 )
 
-func (d *DB) CreateAlerter(guild, channelID, userID, roleID string) error {
+func (d *DB) InitialiseServer(guildID, permID string) error {
+	contxt := context.Background()
+
+	res, err := d.GetAllAlerters(guildID)
+
+	if err != nil {
+		a := &Channel{
+			UserID:        "0",
+			RoleID:        "0",
+			ChannelID:     "0",
+			GuildID:       guildID,
+			PermissionsID: permID,
+		}
+
+		_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_id) DO UPDATE").Exec(contxt)
+
+		if err != nil {
+			log.Println(fmt.Sprintf("Unable to create alerter %v : %v", a, err.Error()))
+			return err
+		}
+		return nil
+	}
+
+	for _, v := range res {
+		if v.PermissionsID != permID {
+			// recreate all alerters with the correct role; assume theyre all dirty
+			for _, v2 := range res {
+				err = d.CreateAlerter(guildID, v2.ChannelID, v2.UserID, v2.RoleID, permID)
+				if err != nil {
+					log.Println(err)
+				}
+
+			}
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID string) error {
 	contxt := context.Background()
 
 	if guild != d.Guild {
 		return errors.New("Incorrect Guild!")
 	}
 	a := &Channel{
-		UserID:    userID,
-		RoleID:    roleID,
-		ChannelID: channelID,
-		GuildID:   guild,
+		UserID:        userID,
+		RoleID:        roleID,
+		ChannelID:     channelID,
+		GuildID:       guild,
+		PermissionsID: permID,
 	}
 
 	_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_id) DO UPDATE").Exec(contxt)

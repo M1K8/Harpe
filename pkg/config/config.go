@@ -16,17 +16,10 @@
 package config
 
 type Config struct {
-	StocksCFG   StocksConfig   `json:"stocks"`
-	DiscordCFG  DiscordConfig  `json:"discord"`
-	TwitterCFG  TwitterConfig  `json:"twitter"`
-	ServersCfg  []ServerConfig `json:"servers"`
-	PostgresCfg PGConfig       `json:"pg"`
-}
-
-type AlerterChannel struct {
-	ChannelID string `json:"cid"`
-	UserID    string `json:"uid"`
-	RoleID    string `json:"rid"`
+	StocksCFG   StocksConfig  `json:"stocks"`
+	DiscordCFG  DiscordConfig `json:"discord"`
+	TwitterCFG  TwitterConfig `json:"twitter"`
+	PostgresCfg PGConfig      `json:"pg"`
 }
 
 type DiscordConfig struct {
@@ -54,18 +47,6 @@ type TwitterKeys struct {
 	C_S string `json:"TWITTER_C_S"`
 	A_T string `json:"TWITTER_A_T"`
 	A_S string `json:"TWITTER_A_S"`
-}
-
-type ServerConfig struct {
-	ID               string        `json:"id"`
-	ChannelConfig    ChannelConfig `json:"channels"`
-	Roles            []string      `json:"allowed_roles"`
-	Whitelisted_UIDs []string      `json:"whitelisted_ids"`
-	AlertRole        string        `json:"alert_role"`
-}
-type ChannelConfig struct {
-	EOD      string           `json:"eod"`
-	Alerters []AlerterChannel `json:"alerters"`
 }
 
 type PGConfig struct {

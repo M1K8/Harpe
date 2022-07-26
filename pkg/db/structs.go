@@ -26,10 +26,11 @@ type Alert interface {
 }
 
 type Channel struct {
-	UserID    string `bun:",pk"`
-	RoleID    string
-	GuildID   string
-	ChannelID string
+	UserID        string `bun:",pk"`
+	RoleID        string
+	GuildID       string
+	ChannelID     string
+	PermissionsID string
 }
 
 type Stock struct {
