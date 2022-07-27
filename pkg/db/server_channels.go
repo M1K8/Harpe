@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func (d *DB) InitialiseServer(guildID, permID string) error {
+func (d *DB) InitialiseServer(guildID, permID, eod string) error {
 	contxt := context.Background()
 
 	res, err := d.GetAllAlerters(guildID)
@@ -17,6 +17,7 @@ func (d *DB) InitialiseServer(guildID, permID string) error {
 			UserID:        "0",
 			RoleID:        "0",
 			ChannelID:     "0",
+			EOD:           eod,
 			GuildID:       guildID,
 			PermissionsID: permID,
 		}
@@ -34,7 +35,7 @@ func (d *DB) InitialiseServer(guildID, permID string) error {
 		if v.PermissionsID != permID {
 			// recreate all alerters with the correct role; assume theyre all dirty
 			for _, v2 := range res {
-				err = d.CreateAlerter(guildID, v2.ChannelID, v2.UserID, v2.RoleID, permID)
+				err = d.CreateAlerter(guildID, v2.ChannelID, v2.UserID, v2.RoleID, permID, eod)
 				if err != nil {
 					log.Println(err)
 				}
@@ -57,7 +58,17 @@ func (d *DB) GetServerPerm(guildID string) (string, error) {
 	return res.PermissionsID, nil
 }
 
-func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID string) error {
+func (d *DB) GetEOD(guildID string) (string, error) {
+	res, err := d.GetAlerter(guildID, "0")
+
+	if err != nil {
+		return "", err
+	}
+
+	return res.EOD, nil
+}
+
+func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID, eod string) error {
 	contxt := context.Background()
 
 	if guild != d.Guild {
@@ -69,6 +80,7 @@ func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID string) erro
 		ChannelID:     channelID,
 		GuildID:       guild,
 		PermissionsID: permID,
+		EOD:           eod,
 	}
 
 	_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_id) DO UPDATE").Exec(contxt)
