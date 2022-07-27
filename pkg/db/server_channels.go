@@ -14,15 +14,16 @@ func (d *DB) InitialiseServer(guildID, permID, eod string) error {
 
 	if err != nil {
 		a := &Channel{
-			UserID:        "0",
-			RoleID:        "0",
-			ChannelID:     "0",
-			EOD:           eod,
-			GuildID:       guildID,
-			PermissionsID: permID,
+			UserGuildComposite: "0" + guildID,
+			UserID:             "0",
+			RoleID:             "0",
+			ChannelID:          "0",
+			EOD:                eod,
+			GuildID:            guildID,
+			PermissionsID:      permID,
 		}
 
-		_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_id) DO UPDATE").Exec(contxt)
+		_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_guild_composite) DO UPDATE").Exec(contxt)
 
 		if err != nil {
 			log.Println(fmt.Sprintf("Unable to create alerter %v : %v", a, err.Error()))
@@ -127,8 +128,9 @@ func (d *DB) GetAlerter(guild, userID string) (*Channel, error) {
 	}
 	contxt := context.Background()
 	a := &Channel{
-		UserID:  userID,
-		GuildID: guild,
+		UserGuildComposite: userID + guild,
+		UserID:             userID,
+		GuildID:            guild,
 	}
 	err := d.db.NewSelect().Model(a).Where("user_guild_composite = ?", userID+guild).Scan(contxt, a)
 
