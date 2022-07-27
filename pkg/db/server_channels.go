@@ -75,15 +75,16 @@ func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID, eod string)
 		return errors.New("Incorrect Guild!")
 	}
 	a := &Channel{
-		UserID:        userID,
-		RoleID:        roleID,
-		ChannelID:     channelID,
-		GuildID:       guild,
-		PermissionsID: permID,
-		EOD:           eod,
+		UserGuildComposite: userID + guild,
+		UserID:             userID,
+		RoleID:             roleID,
+		ChannelID:          channelID,
+		GuildID:            guild,
+		PermissionsID:      permID,
+		EOD:                eod,
 	}
 
-	_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_id) DO UPDATE").Exec(contxt)
+	_, err := d.db.NewInsert().Model(a).On("CONFLICT (user_guild_composite) DO UPDATE").Exec(contxt)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to create alerter %v : %v", a, err.Error()))
@@ -100,11 +101,12 @@ func (d *DB) RemoveAlerter(guild, userID string) error {
 		return errors.New("Incorrect Guild!")
 	}
 	a := &Channel{
-		UserID:  userID,
-		GuildID: guild,
+		UserGuildComposite: userID + guild,
+		UserID:             userID,
+		GuildID:            guild,
 	}
 
-	res, err := d.db.NewDelete().Model(a).Where("user_id = ?", userID).Exec(contxt)
+	res, err := d.db.NewDelete().Model(a).Where("user_guild_composite = ?", userID+guild).Exec(contxt)
 	rowsAffected, _ := res.RowsAffected()
 
 	if rowsAffected == 0 {
@@ -128,7 +130,7 @@ func (d *DB) GetAlerter(guild, userID string) (*Channel, error) {
 		UserID:  userID,
 		GuildID: guild,
 	}
-	err := d.db.NewSelect().Model(a).Where("user_id = ?", userID).Scan(contxt)
+	err := d.db.NewSelect().Model(a).Where("user_guild_composite = ?", userID+guild).Scan(contxt, a)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get alerter %v : %v", userID, err.Error()))
@@ -143,7 +145,7 @@ func (d *DB) GetAllAlerters(guild string) ([]*Channel, error) {
 	}
 	allAlerters := make([]*Channel, 0)
 	contxt := context.Background()
-	err := d.db.NewSelect().Model((*Channel)(nil)).Where("guild_id = ?", guild).Scan(contxt, &allAlerters)
+	err := d.db.NewSelect().Model(([]*Channel)(nil)).Where("guild_id = ?", guild).Scan(contxt, &allAlerters)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get alerters %v : %v", guild, err.Error()))
