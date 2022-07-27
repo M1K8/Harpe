@@ -18,7 +18,6 @@ package config
 type Config struct {
 	StocksCFG   StocksConfig  `json:"stocks"`
 	DiscordCFG  DiscordConfig `json:"discord"`
-	TwitterCFG  TwitterConfig `json:"twitter"`
 	PostgresCfg PGConfig      `json:"pg"`
 }
 
@@ -30,23 +29,6 @@ type StocksConfig struct {
 	Finn_API string `json:"FINNHUB_API"`
 	E        string `json:"ENDPOINT"`
 	Key      string `json:"KEY"`
-}
-
-type TwitterConfig struct {
-	Allowed_guilds []AllowedGuild `json:"allowed_guilds"`
-	Keys           TwitterKeys    `json:"keys"`
-}
-
-type AllowedGuild struct {
-	GID  string `json:"guildID"`
-	TUID string `json:"TwitterUID"`
-}
-
-type TwitterKeys struct {
-	C_K string `json:"TWITTER_C_K"`
-	C_S string `json:"TWITTER_C_S"`
-	A_T string `json:"TWITTER_A_T"`
-	A_S string `json:"TWITTER_A_S"`
 }
 
 type PGConfig struct {
