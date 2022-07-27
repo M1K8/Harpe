@@ -145,7 +145,7 @@ func (d *DB) GetAllAlerters(guild string) ([]*Channel, error) {
 	}
 	allAlerters := make([]*Channel, 0)
 	contxt := context.Background()
-	err := d.db.NewSelect().Model(([]*Channel)(nil)).Where("guild_id = ?", guild).Scan(contxt, &allAlerters)
+	err := d.db.NewSelect().Model(&allAlerters).Where("user_guild_composite = ?", guild).Scan(contxt, &allAlerters)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get alerters %v : %v", guild, err.Error()))
