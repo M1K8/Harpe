@@ -31,6 +31,7 @@ type Channel struct {
 	GuildID       string
 	ChannelID     string
 	PermissionsID string
+	EOD           string
 }
 
 type Stock struct {
