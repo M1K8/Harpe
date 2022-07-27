@@ -75,8 +75,9 @@ func (d *DB) CreateAlerter(guild, channelID, userID, roleID, permID, eod string)
 	if guild != d.Guild {
 		return errors.New("Incorrect Guild!")
 	}
+	comp := userID + guild
 	a := &Channel{
-		UserGuildComposite: userID + guild,
+		UserGuildComposite: comp,
 		UserID:             userID,
 		RoleID:             roleID,
 		ChannelID:          channelID,
@@ -101,13 +102,14 @@ func (d *DB) RemoveAlerter(guild, userID string) error {
 	if guild != d.Guild {
 		return errors.New("Incorrect Guild!")
 	}
+	comp := userID + guild
 	a := &Channel{
-		UserGuildComposite: userID + guild,
+		UserGuildComposite: comp,
 		UserID:             userID,
 		GuildID:            guild,
 	}
 
-	res, err := d.db.NewDelete().Model(a).Where("user_guild_composite = ?", userID+guild).Exec(contxt)
+	res, err := d.db.NewDelete().Model(a).Where("user_guild_composite = ?", comp).Exec(contxt)
 	rowsAffected, _ := res.RowsAffected()
 
 	if rowsAffected == 0 {
@@ -127,12 +129,13 @@ func (d *DB) GetAlerter(guild, userID string) (*Channel, error) {
 		return nil, errors.New("Incorrect Guild!")
 	}
 	contxt := context.Background()
+	comp := userID + guild
 	a := &Channel{
-		UserGuildComposite: userID + guild,
+		UserGuildComposite: comp,
 		UserID:             userID,
 		GuildID:            guild,
 	}
-	err := d.db.NewSelect().Model(a).Where("user_guild_composite = ?", userID+guild).Scan(contxt, a)
+	err := d.db.NewSelect().Model(a).Where("user_guild_composite = ?", comp).Scan(contxt, a)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get alerter %v : %v", userID, err.Error()))
@@ -147,7 +150,7 @@ func (d *DB) GetAllAlerters(guild string) ([]*Channel, error) {
 	}
 	allAlerters := make([]*Channel, 0)
 	contxt := context.Background()
-	err := d.db.NewSelect().Model(&allAlerters).Where("user_guild_composite = ?", guild).Scan(contxt, &allAlerters)
+	err := d.db.NewSelect().Model(&allAlerters).Where("guild_id = ?", guild).Scan(contxt, &allAlerters)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Unable to get alerters %v : %v", guild, err.Error()))
